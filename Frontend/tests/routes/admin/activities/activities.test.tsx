@@ -4,14 +4,17 @@ import type { ActivityResponseDto } from "~/api";
 import { renderWithProviders } from "~/testUtils";
 import { getCommitteeYear } from "~/util/date.util";
 
-const { loadAdminActivities, handleViewActivity } = vi.hoisted(() => ({
-  loadAdminActivities: vi.fn(),
-  handleViewActivity: vi.fn(),
-}));
+const { loadAdminActivities, handleViewActivity, handleDeleteAdminActivity } =
+  vi.hoisted(() => ({
+    loadAdminActivities: vi.fn(),
+    handleViewActivity: vi.fn(),
+    handleDeleteAdminActivity: vi.fn(),
+  }));
 
 vi.mock("~/routes/admin/activities/activities.handlers", () => ({
   loadAdminActivities,
   handleViewActivity,
+  handleDeleteAdminActivity,
 }));
 
 // jsdom does not implement IntersectionObserver. Stub it locally (not touching the shared
@@ -319,4 +322,66 @@ describe("Activities (admin)", () => {
 
     expect(await screen.findByText("no_more_activities")).toBeInTheDocument();
   });
+
+  it("renders a delete button for each activity and calls handleDeleteAdminActivity on click", async () => {
+    loadAdminActivities.mockImplementation(
+      async (_year, setLoading, setActivities) => {
+        setActivities([
+          makeActivity({ id: 1, name: "Feest" }),
+          makeActivity({ id: 2, name: "Borrel" }),
+        ]);
+        setLoading(false);
+      },
+    );
+
+    renderWithProviders(<Activities />);
+
+    expect(await screen.findByText("Feest")).toBeInTheDocument();
+    const deleteButtons = screen.getAllByRole("button", {
+      name: "delete_activity",
+    });
+    expect(deleteButtons).toHaveLength(2);
+
+    fireEvent.click(deleteButtons[0]);
+
+    expect(handleDeleteAdminActivity).toHaveBeenCalledWith(
+      1,
+      expect.any(Function),
+      expect.any(Function),
+    );
+  });
+
+  it("removes the deleted activity from the list when handleDeleteAdminActivity invokes onSuccess", async () => {
+    loadAdminActivities.mockImplementation(
+      async (_year, setLoading, setActivities) => {
+        setActivities([
+          makeActivity({ id: 1, name: "Feest" }),
+          makeActivity({ id: 2, name: "Borrel" }),
+        ]);
+        setLoading(false);
+      },
+    );
+
+    handleDeleteAdminActivity.mockImplementation(
+      (_id, _confirm, onSuccess) => {
+        onSuccess();
+      },
+    );
+
+    renderWithProviders(<Activities />);
+
+    expect(await screen.findByText("Feest")).toBeInTheDocument();
+    expect(screen.getByText("Borrel")).toBeInTheDocument();
+
+    const deleteButtons = screen.getAllByRole("button", {
+      name: "delete_activity",
+    });
+    fireEvent.click(deleteButtons[0]);
+
+    await waitFor(() => {
+      expect(screen.queryByText("Feest")).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("Borrel")).toBeInTheDocument();
+  });
 });
+

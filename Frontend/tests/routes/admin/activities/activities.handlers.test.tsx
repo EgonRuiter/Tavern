@@ -2,18 +2,32 @@ import type { NavigateFunction } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ActivityResponseDto } from "~/api";
 
-const { getActivities } = vi.hoisted(() => ({
+const { getActivities, deleteActivitiesById } = vi.hoisted(() => ({
   getActivities: vi.fn(),
+  deleteActivitiesById: vi.fn(),
 }));
 
-vi.mock("~/api", () => ({ getActivities }));
+vi.mock("~/api", () => ({ getActivities, deleteActivitiesById }));
 
 vi.mock("react-hot-toast", () => ({
-  default: { success: vi.fn(), error: vi.fn(), promise: vi.fn((p) => p) },
+  default: {
+    success: vi.fn(),
+    error: vi.fn(),
+    promise: vi.fn((promise: Promise<unknown>, opts: any) => {
+      promise
+        .then(
+          (data) => opts?.success?.(data),
+          (err) => opts?.error?.(err),
+        )
+        .catch(() => {});
+      return promise;
+    }),
+  },
 }));
 
 import toast from "react-hot-toast";
 import {
+  handleDeleteAdminActivity,
   handleViewActivity,
   loadAdminActivities,
 } from "~/routes/admin/activities/activities.handlers";
@@ -93,3 +107,44 @@ describe("handleViewActivity", () => {
     expect(navigate).toHaveBeenCalledWith("/admin/activities/42");
   });
 });
+
+describe("handleDeleteAdminActivity", () => {
+  it("does nothing when confirmation is rejected", async () => {
+    const confirm = vi.fn().mockResolvedValue(false);
+    const onSuccess = vi.fn();
+
+    await handleDeleteAdminActivity(42, confirm, onSuccess);
+
+    expect(confirm).toHaveBeenCalled();
+    expect(deleteActivitiesById).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it("calls delete endpoint and invokes onSuccess when confirmed", async () => {
+    const confirm = vi.fn().mockResolvedValue(true);
+    const onSuccess = vi.fn();
+    deleteActivitiesById.mockResolvedValue({ error: null });
+
+    await handleDeleteAdminActivity(42, confirm, onSuccess);
+
+    expect(confirm).toHaveBeenCalled();
+    await vi.waitFor(() =>
+      expect(deleteActivitiesById).toHaveBeenCalledWith({ path: { id: 42 } }),
+    );
+    expect(onSuccess).toHaveBeenCalled();
+  });
+
+  it("does not invoke onSuccess when delete endpoint returns error", async () => {
+    const confirm = vi.fn().mockResolvedValue(true);
+    const onSuccess = vi.fn();
+    deleteActivitiesById.mockResolvedValue({ error: "Failed to delete" });
+
+    await handleDeleteAdminActivity(42, confirm, onSuccess);
+
+    await vi.waitFor(() =>
+      expect(deleteActivitiesById).toHaveBeenCalledWith({ path: { id: 42 } }),
+    );
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+});
+

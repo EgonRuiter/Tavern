@@ -1,4 +1,5 @@
 import { t } from "i18next";
+import { Trash2Icon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import type { ActivityResponseDto } from "~/api";
@@ -6,11 +7,16 @@ import BorderedTile from "~/components/Tiles/BorderedTile";
 import type { Column } from "~/components/Tiles/DataTableTile";
 import DataTable from "~/components/Tiles/DataTableTile";
 import Button from "~/components/UI/Button";
+import { useConfirm } from "~/components/UI/ConfirmModal/useConfirm";
 import Input from "~/components/UI/Input";
 import { PageHeader } from "~/components/UI/PageHeader";
 import Select from "~/components/UI/Select";
 import { formatDate, getCommitteeYear } from "~/util/date.util";
-import { handleViewActivity, loadAdminActivities } from "./activities.handlers";
+import {
+  handleDeleteAdminActivity,
+  handleViewActivity,
+  loadAdminActivities,
+} from "./activities.handlers";
 
 /** The number of activities to fetch per page for infinite scrolling. */
 const PAGE_SIZE = 15;
@@ -32,6 +38,7 @@ const PAGE_SIZE = 15;
  */
 export default function Activities() {
   const navigate = useNavigate();
+  const [confirmModal, confirm] = useConfirm();
 
   const [loading, setLoading] = useState(false);
   const currentYear = getCommitteeYear();
@@ -168,16 +175,31 @@ export default function Activities() {
       header: "",
       className: "w-full sm:w-px whitespace-nowrap text-right",
       render: (act) => (
-        <Button
-          variant="secondary"
-          className="w-full sm:w-auto"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleViewActivity(navigate, act.id);
-          }}
-        >
-          {t("view_activity")}
-        </Button>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="secondary"
+            className="w-full sm:w-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewActivity(navigate, act.id);
+            }}
+          >
+            {t("view_activity")}
+          </Button>
+          <Button
+            variant="danger"
+            className="px-2"
+            aria-label={t("delete_activity")}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteAdminActivity(act.id, confirm, () => {
+                setActivities((prev) => prev.filter((a) => a.id !== act.id));
+              });
+            }}
+          >
+            <Trash2Icon size={16} />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -227,6 +249,7 @@ export default function Activities() {
           </span>
         </div>
       </BorderedTile>
+      {confirmModal}
     </div>
   );
 }

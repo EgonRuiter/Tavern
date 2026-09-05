@@ -4,6 +4,7 @@ import type { ActivityResponseDto } from "~/api";
 import ActivityPage from "~/routes/activity/activity";
 import {
   getActivityBackPath,
+  handleDeleteActivity,
   handleEditActivityClick,
   loadActivityData,
 } from "~/routes/activity/activity.handlers";
@@ -14,6 +15,7 @@ vi.mock("~/routes/activity/activity.handlers", () => ({
   loadActivityData: vi.fn(),
   getActivityBackPath: vi.fn(() => "/activities"),
   handleEditActivityClick: vi.fn(),
+  handleDeleteActivity: vi.fn(),
 }));
 
 vi.mock(
@@ -211,4 +213,66 @@ describe("ActivityPage", () => {
     expect(handleEditActivityClick).toHaveBeenCalled();
     expect(getActivityBackPath).toHaveBeenCalled();
   });
+
+  it("does not show a delete button for a non-board member", async () => {
+    vi.mocked(loadActivityData).mockImplementation(
+      async ({ setLoading, setActivity }) => {
+        setActivity(buildActivity());
+        setLoading(false);
+      },
+    );
+    const authService = createMockAuthService({
+      getTokenParsed: vi.fn(async () => ({
+        ...memberToken,
+        is_admin: false,
+      })),
+    });
+    renderWithProviders(
+      <ActivityPage params={{ id: "1" }} {...({} as any)} />,
+      {
+        authService,
+      },
+    );
+
+    await screen.findByText("activity-details-tile");
+    expect(document.querySelector("svg.lucide-trash-2")).not.toBeInTheDocument();
+  });
+
+  it("shows and wires up a delete button for a board member", async () => {
+    vi.mocked(loadActivityData).mockImplementation(
+      async ({ setLoading, setActivity }) => {
+        setActivity(buildActivity());
+        setLoading(false);
+      },
+    );
+    const authService = createMockAuthService({
+      getTokenParsed: vi.fn(async () => ({
+        ...memberToken,
+        is_admin: true,
+      })),
+    });
+    renderWithProviders(
+      <ActivityPage params={{ id: "1" }} {...({} as any)} />,
+      {
+        authService,
+      },
+    );
+
+    await screen.findByText("activity-details-tile");
+    await waitFor(() =>
+      expect(document.querySelector("svg.lucide-trash-2")).toBeTruthy(),
+    );
+    const deleteButton = document
+      .querySelector("svg.lucide-trash-2")
+      ?.closest("button");
+    expect(deleteButton).toBeTruthy();
+    fireEvent.click(deleteButton!);
+    expect(handleDeleteActivity).toHaveBeenCalledWith(
+      1,
+      expect.any(Function),
+      expect.any(String),
+      expect.any(Function),
+    );
+  });
 });
+

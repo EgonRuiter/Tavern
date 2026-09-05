@@ -6,6 +6,7 @@ import {
   addQuestion,
   handleActivityFormChange,
   handleActivitySubmit,
+  handleDeleteActivityFromForm,
   loadGroups,
   removeQuestion,
 } from "~/components/Activity/Edit/EditActivityForm/EditActivityForm.handlers";
@@ -25,6 +26,7 @@ vi.mock(
     removeQuestion: vi.fn(),
     updateQuestion: vi.fn(),
     handleActivitySubmit: vi.fn((args: any) => args.e.preventDefault()),
+    handleDeleteActivityFromForm: vi.fn(),
   }),
 );
 
@@ -168,4 +170,33 @@ describe("EditActivityForm", () => {
     );
     expect(screen.getByText("save")).toBeInTheDocument();
   });
+
+  it("does not show delete button when creating an activity", () => {
+    renderWithProviders(
+      <EditActivityForm activity={null} id={undefined} isBoard={true} />,
+    );
+    expect(screen.queryByText("delete_activity")).not.toBeInTheDocument();
+  });
+
+  it("does not show delete button when editing as a non-board user", () => {
+    renderWithProviders(
+      <EditActivityForm activity={buildActivity()} id="1" isBoard={false} />,
+    );
+    expect(screen.queryByText("delete_activity")).not.toBeInTheDocument();
+  });
+
+  it("shows delete button and calls handleDeleteActivityFromForm when editing as board", () => {
+    renderWithProviders(
+      <EditActivityForm activity={buildActivity()} id="1" isBoard={true} />,
+    );
+    const deleteButton = screen.getByText("delete_activity");
+    expect(deleteButton).toBeInTheDocument();
+    fireEvent.click(deleteButton);
+    expect(handleDeleteActivityFromForm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activityId: 1,
+      }),
+    );
+  });
 });
+

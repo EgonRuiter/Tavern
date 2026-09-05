@@ -1,18 +1,20 @@
 import { t } from "i18next";
-import { PencilIcon } from "lucide-react";
+import { PencilIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import type { ActivityResponseDto } from "~/api";
 import ActivityDetailsTile from "~/components/Activity/ActivityDetailsTile/ActivityDetailsTile";
 import ActivityParticipantsTile from "~/components/Activity/ActivityParticipantsTile/ActivityParticipantsTile";
 import Button from "~/components/UI/Button";
+import { useConfirm } from "~/components/UI/ConfirmModal/useConfirm";
 import { PageHeader } from "~/components/UI/PageHeader";
 import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
-import { canEditActivity } from "~/util/group.util";
+import { canEditActivity, isBoardOrCandidateBoard } from "~/util/group.util";
 import type { Route } from "./+types/activity";
 import {
   getActivityBackPath,
+  handleDeleteActivity,
   handleEditActivityClick,
   loadActivityData,
 } from "./activity.handlers";
@@ -37,6 +39,7 @@ import {
  */
 export default function ActivityPage({ params }: Route.LoaderArgs) {
   const authService = useAuth();
+  const [confirmModal, confirm] = useConfirm();
   const [tokenParsed, setTokenParsed] = useState<TokenParsed | null>(null);
   const [canEdit, setCanEdit] = useState(false);
   const navigate = useNavigate();
@@ -87,17 +90,39 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
         title={activity.name}
         backTo={getActivityBackPath(pathname)}
         action={
-          canEdit &&
-          activity && (
-            <Button
-              onClick={() =>
-                handleEditActivityClick(navigate, pathname, activity.id)
-              }
-              variant="secondary"
-              className="flex items-center px-2"
-            >
-              <PencilIcon size={18} />
-            </Button>
+          activity &&
+          (canEdit || isBoardOrCandidateBoard(tokenParsed)) && (
+            <div className="flex items-center gap-2">
+              {canEdit && (
+                <Button
+                  onClick={() =>
+                    handleEditActivityClick(navigate, pathname, activity.id)
+                  }
+                  variant="secondary"
+                  className="flex items-center px-2"
+                  aria-label={t("edit")}
+                >
+                  <PencilIcon size={18} />
+                </Button>
+              )}
+              {isBoardOrCandidateBoard(tokenParsed) && (
+                <Button
+                  onClick={() =>
+                    handleDeleteActivity(
+                      activity.id,
+                      navigate,
+                      pathname,
+                      confirm,
+                    )
+                  }
+                  variant="danger"
+                  className="flex items-center px-2"
+                  aria-label={t("delete_activity")}
+                >
+                  <Trash2Icon size={18} />
+                </Button>
+              )}
+            </div>
           )
         }
       />
@@ -126,6 +151,7 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
           </>
         )}
       </div>
+      {confirmModal}
     </div>
   );
 }

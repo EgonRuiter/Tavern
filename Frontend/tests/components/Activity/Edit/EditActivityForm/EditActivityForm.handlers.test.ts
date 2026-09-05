@@ -8,6 +8,7 @@ import {
   addQuestion,
   handleActivityFormChange,
   handleActivitySubmit,
+  handleDeleteActivityFromForm,
   loadGroups,
   removeQuestion,
   updateQuestion,
@@ -18,11 +19,13 @@ const {
   patchActivitiesById,
   postActivitiesByIdPoster,
   getGroups,
+  deleteActivitiesById,
 } = vi.hoisted(() => ({
   postActivities: vi.fn(),
   patchActivitiesById: vi.fn(),
   postActivitiesByIdPoster: vi.fn(),
   getGroups: vi.fn(),
+  deleteActivitiesById: vi.fn(),
 }));
 
 vi.mock("~/api", () => ({
@@ -30,6 +33,7 @@ vi.mock("~/api", () => ({
   patchActivitiesById,
   postActivitiesByIdPoster,
   getGroups,
+  deleteActivitiesById,
 }));
 
 const toastErrorFn = vi.fn();
@@ -520,3 +524,88 @@ describe("handleActivitySubmit", () => {
     consoleError.mockRestore();
   });
 });
+
+describe("handleDeleteActivityFromForm", () => {
+  it("does nothing when confirmation is rejected", async () => {
+    const confirm = vi.fn().mockResolvedValue(false);
+    const navigate = vi.fn();
+    const setSaving = vi.fn();
+
+    await handleDeleteActivityFromForm({
+      activityId: 10,
+      navigate,
+      pathname: "/activities/edit/10",
+      confirm,
+      setSaving,
+    });
+
+    expect(confirm).toHaveBeenCalled();
+    expect(deleteActivitiesById).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(setSaving).not.toHaveBeenCalled();
+  });
+
+  it("deletes the activity and navigates to /activities on confirmation", async () => {
+    const confirm = vi.fn().mockResolvedValue(true);
+    const navigate = vi.fn();
+    const setSaving = vi.fn();
+    deleteActivitiesById.mockResolvedValue({ error: null });
+
+    await handleDeleteActivityFromForm({
+      activityId: 10,
+      navigate,
+      pathname: "/activities/edit/10",
+      confirm,
+      setSaving,
+    });
+
+    expect(confirm).toHaveBeenCalled();
+    await vi.waitFor(() =>
+      expect(deleteActivitiesById).toHaveBeenCalledWith({ path: { id: 10 } }),
+    );
+    expect(setSaving).toHaveBeenCalledWith(true);
+    expect(setSaving).toHaveBeenCalledWith(false);
+    expect(navigate).toHaveBeenCalledWith("/activities");
+  });
+
+  it("navigates to /admin/activities when pathname starts with /admin", async () => {
+    const confirm = vi.fn().mockResolvedValue(true);
+    const navigate = vi.fn();
+    const setSaving = vi.fn();
+    deleteActivitiesById.mockResolvedValue({ error: null });
+
+    await handleDeleteActivityFromForm({
+      activityId: 10,
+      navigate,
+      pathname: "/admin/activities/edit/10",
+      confirm,
+      setSaving,
+    });
+
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith("/admin/activities"),
+    );
+  });
+
+  it("handles error when deletion API fails", async () => {
+    const confirm = vi.fn().mockResolvedValue(true);
+    const navigate = vi.fn();
+    const setSaving = vi.fn();
+    deleteActivitiesById.mockResolvedValue({ error: "deletion forbidden" });
+
+    await handleDeleteActivityFromForm({
+      activityId: 10,
+      navigate,
+      pathname: "/activities/edit/10",
+      confirm,
+      setSaving,
+    });
+
+    await vi.waitFor(() =>
+      expect(deleteActivitiesById).toHaveBeenCalledWith({ path: { id: 10 } }),
+    );
+    expect(setSaving).toHaveBeenCalledWith(false);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+});
+

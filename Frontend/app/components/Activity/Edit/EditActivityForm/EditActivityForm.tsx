@@ -12,6 +12,7 @@ import BorderedTile from "../../../Tiles/BorderedTile";
 import { NoContentTile } from "../../../Tiles/NoContentTile";
 import Button from "../../../UI/Button";
 import Checkbox from "../../../UI/Checkbox";
+import { useConfirm } from "../../../UI/ConfirmModal/useConfirm";
 import Form from "../../../UI/Form/Form";
 import { FormHeader } from "../../../UI/Form/FormHeader";
 import { FormSection } from "../../../UI/Form/FormSection";
@@ -25,6 +26,7 @@ import {
   formatForInput,
   handleActivityFormChange,
   handleActivitySubmit,
+  handleDeleteActivityFromForm,
   loadGroups,
   removeQuestion,
   updateQuestion,
@@ -69,6 +71,7 @@ export default function EditActivityForm({
 }) {
   const navigate = useNavigate();
   const { pathname } = window.location;
+  const [confirmModal, confirm] = useConfirm();
 
   const isEdit = !!id;
   const audienceMask = parseAudience(activity?.allowedAudience);
@@ -391,15 +394,37 @@ export default function EditActivityForm({
             )}
           </FormSection>
 
-          <Button
-            type="submit"
-            disabled={saving || !formValid}
-            className="w-full"
-          >
-            {saving ? t("saving") : isEdit ? t("save") : t("create_activity")}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full">
+            <Button
+              type="submit"
+              disabled={saving || !formValid}
+              className="w-full"
+            >
+              {saving ? t("saving") : isEdit ? t("save") : t("create_activity")}
+            </Button>
+            {isEdit && isBoard && (
+              <Button
+                type="button"
+                variant="danger"
+                disabled={saving}
+                onClick={() =>
+                  handleDeleteActivityFromForm({
+                    activityId: Number(id),
+                    navigate,
+                    pathname,
+                    confirm,
+                    setSaving,
+                  })
+                }
+                className="w-full sm:w-auto whitespace-nowrap"
+              >
+                {t("delete_activity")}
+              </Button>
+            )}
+          </div>
         </Form>
       </BorderedTile>
+      {confirmModal}
     </div>
   );
 }
