@@ -11,6 +11,7 @@ import Form from "~/components/UI/Form/Form";
 import { FormHeader } from "~/components/UI/Form/FormHeader";
 import { FormSection } from "~/components/UI/Form/FormSection";
 import Input from "~/components/UI/Input";
+import ThemeToggle from "~/components/UI/ThemeToggle";
 import { useApp } from "~/context/AppContext";
 import { useAuth } from "~/context/AuthContext";
 import { getEnv } from "~/util/config.utils";
@@ -282,6 +283,14 @@ export default function ChangeAccountForm({
             </Button>
           </div>
         </div>
+
+        <div>
+          <FormHeader title={t("theme")} border={false} />
+          <ThemeToggle variant="segmented" />
+        </div>
+      </FormSection>
+
+      <FormSection columns={1}>
         <div>
           <FormHeader title={t("security")} border={false} />
           <div className="flex flex-col gap-2">

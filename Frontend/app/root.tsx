@@ -77,14 +77,33 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+import { ThemeProvider } from "./context/ThemeContext";
+
 const getDocumentLanguage = () =>
   (i18n.resolvedLanguage || i18n.language || "en").split("-")[0];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const currentLang = getDocumentLanguage();
   return (
-    <html lang={currentLang}>
+    <html lang={currentLang} suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var t = localStorage.getItem('tavern_theme') || 'system';
+                  var d = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (d) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
         <script src="/env-config.js" />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -210,11 +229,13 @@ export default function App() {
   }
 
   return (
-    <AppProvider>
-      <FaviconHandler />
-      {isClient && <Toaster position="bottom-right" />}
-      <Outlet />
-    </AppProvider>
+    <ThemeProvider>
+      <AppProvider>
+        <FaviconHandler />
+        {isClient && <Toaster position="bottom-right" />}
+        <Outlet />
+      </AppProvider>
+    </ThemeProvider>
   );
 }
 
