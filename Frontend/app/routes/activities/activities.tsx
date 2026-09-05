@@ -3,9 +3,10 @@ import {
   CalendarClock,
   CalendarDaysIcon,
   DownloadIcon,
+  MenuIcon,
   PlusIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import type { ActivityResponseDto } from "~/api";
 import ActivityTile from "~/components/Activity/ActivityTile/ActivityTile";
@@ -26,6 +27,87 @@ import {
   handleCreateActivityClick,
   loadActivities,
 } from "./activities.handlers";
+
+interface BoardDropdownProps {
+  activities: ActivityResponseDto[];
+  token: string;
+}
+
+export function BoardDropdown({ activities, token }: BoardDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <Button
+        onClick={() => setIsOpen((prev) => !prev)}
+        variant="secondary"
+        className="items-center px-3 py-1"
+        aria-label="Board Actions"
+        aria-expanded={isOpen}
+      >
+        <MenuIcon className="w-5 h-5" />
+      </Button>
+
+      {isOpen && (
+        <ul className="flex flex-col gap-2 right-0 top-11 absolute w-max bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 shadow-lg z-50 animate-in fade-in zoom-in-95 duration-150">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              downloadPosters(activities, token);
+              setIsOpen(false);
+            }}
+            className="text-xs px-3 py-1.5 justify-start text-left"
+            title="Download Koala Posters"
+          >
+            <DownloadIcon size={18} className="mr-2" />
+            {t("download_posters")}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              copyWeekOverview("NL", activities);
+              setIsOpen(false);
+            }}
+            className="text-xs px-3 py-1.5 justify-start text-left"
+          >
+            <CalendarDaysIcon size={18} className="mr-2" />
+            {t("copy")} {t("weekoverview").toLowerCase()} NL
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              copyWeekOverview("EN", activities);
+              setIsOpen(false);
+            }}
+            className="text-xs px-3 py-1.5 justify-start text-left"
+          >
+            <CalendarDaysIcon size={18} className="mr-2" />
+            {t("copy")} {t("weekoverview").toLowerCase()} EN
+          </Button>
+        </ul>
+      )}
+    </div>
+  );
+}
 
 /**
  * The main activities listing page for both members and administrators.
@@ -101,67 +183,38 @@ export default function ActivitiesPage() {
 
   return (
     <>
-      <div
-        className={`flex flex-col ${isBoard ? " 2xl:flex-row 2xl:items-start 2xl:gap-3" : "md:flex-row md:items-start md:gap-3"} justify-between gap-0 `}
-      >
+      <div className="flex flex-col md:flex-row md:items-start md:gap-3 justify-between gap-0">
         <PageHeader
           title={t("activities")}
           action={
             <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setCalendarTileOpen(true)}
+                className="text-xs px-3 py-1"
+                title={t("personal_calendar")}
+              >
+                <CalendarClock size={20} className="mr-1" />
+                <span className="hidden md:inline-block">
+                  {t("personal_calendar")}
+                </span>
+              </Button>
               {isInGroup && (
                 <Button
                   variant="secondary"
                   onClick={() => handleCreateActivityClick(navigate)}
                   className="items-center px-3 py-1"
+                  aria-label="Create Activity"
                 >
                   <PlusIcon className="w-5 h-5" />
                 </Button>
               )}
+              {isBoard && (
+                <BoardDropdown activities={activities} token={token ?? ""} />
+              )}
             </div>
           }
         />
-        <div
-          className={`flex flex-col ${isBoard ? " 2xl:flex-row 2xl:items-start" : "md:flex-row md:items-start"} justify-between gap-3`}
-        >
-          <Button
-            variant="secondary"
-            onClick={() => setCalendarTileOpen(true)}
-            className={`text-xs px-3 py-1 ${!isBoard ? "mb-4" : ""}`}
-            title={t("personal_calendar")}
-          >
-            <CalendarClock size={20} className="mr-1" />
-            {t("personal_calendar")}
-          </Button>
-          {isBoard && (
-            <>
-              <Button
-                variant="secondary"
-                onClick={() => downloadPosters(activities, token ?? "")}
-                className="text-xs px-3 py-1"
-                title="Download Koala Posters"
-              >
-                <DownloadIcon size={20} className="mr-1" />
-                {t("download_posters")}
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => copyWeekOverview("NL", activities)}
-                className="text-xs px-3 py-1"
-              >
-                <CalendarDaysIcon size={20} className="mr-1" />
-                {t("copy")} {t("weekoverview").toLowerCase()} NL
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => copyWeekOverview("EN", activities)}
-                className="text-xs px-3 py-1 mb-4"
-              >
-                <CalendarDaysIcon size={20} className="mr-1" />
-                {t("copy")} {t("weekoverview").toLowerCase()} EN
-              </Button>
-            </>
-          )}
-        </div>
       </div>
 
       <Modal

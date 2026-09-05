@@ -140,15 +140,33 @@ describe("ActivitiesPage", () => {
     });
     renderWithProviders(<ActivitiesPage />, { authService });
 
-    const downloadButton = await screen.findByText("download_posters");
+    const menuButton = await screen.findByLabelText("Board Actions");
+    expect(menuButton).toBeInTheDocument();
+
+    // Initially closed
+    expect(screen.queryByText("download_posters")).not.toBeInTheDocument();
+
+    // Open dropdown
+    fireEvent.click(menuButton);
+    const downloadButton = screen.getByText("download_posters");
     fireEvent.click(downloadButton);
     expect(downloadPosters).toHaveBeenCalledWith([], "tok");
 
+    // Open dropdown again for copy NL
+    fireEvent.click(menuButton);
     fireEvent.click(screen.getByText(/copy.*NL/));
     expect(copyWeekOverview).toHaveBeenCalledWith("NL", []);
 
+    // Open dropdown again for copy EN
+    fireEvent.click(menuButton);
     fireEvent.click(screen.getByText(/copy.*EN/));
     expect(copyWeekOverview).toHaveBeenCalledWith("EN", []);
+
+    // Verify outside click closes dropdown
+    fireEvent.click(menuButton);
+    expect(screen.getByText("download_posters")).toBeInTheDocument();
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByText("download_posters")).not.toBeInTheDocument();
   });
 
   it("shows a create-activity button for a group member and wires it up", async () => {
