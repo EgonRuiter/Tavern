@@ -1,4 +1,3 @@
-import { t } from "i18next";
 import {
   Calendar,
   Clock,
@@ -8,6 +7,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import Markdown from "react-markdown";
 import {
   type ActivityResponseDto,
@@ -95,6 +95,7 @@ export default function ActivityDetailsTile({
     React.SetStateAction<ActivityResponseDto | null>
   >;
 }) {
+  const { t, i18n } = useTranslation();
   const authService = useAuth();
   const { member } = useApp();
   const [tokenParsed, setTokenParsed] = useState<TokenParsed | null>(null);
@@ -178,6 +179,15 @@ export default function ActivityDetailsTile({
     action(authService, activity, setActivity, answers, setSubmitting);
   };
 
+  const isDutch = (
+    i18n.language ||
+    member?.preferredLanguage ||
+    tokenParsed?.locale ||
+    "nl"
+  )
+    .toLowerCase()
+    .startsWith("nl");
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       {/* Poster Column */}
@@ -219,7 +229,7 @@ export default function ActivityDetailsTile({
               onLoad={() => setPosterStatus("loaded")}
               onError={() => setPosterStatus("error")}
               crossOrigin="use-credentials"
-              className={`w-full h-full object-cover transition-opacity duration-500 ${
+              className={`w-full h-full object-cover transition-all duration-500 hover:scale-105 ${
                 posterStatus === "loading" ? "opacity-0" : "opacity-100"
               }`}
               loading="lazy"
@@ -228,13 +238,13 @@ export default function ActivityDetailsTile({
         </div>
       </div>
 
-      {/* Info Column */}
+      {/* Details Column */}
       <div className="lg:col-span-7 flex flex-col gap-6">
-        <section>
-          <h1 className="text-4xl font-black text-slate-900 mt-4 mb-2 tracking-tight">
+        <section className="space-y-1">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             {activity.name}
           </h1>
-          <p className="text-2xl font-semibold text-slate-800">
+          <p className="text-lg font-semibold text-(--board-primary)">
             {activity.price === 0 || activity.price == null
               ? t("free")
               : `€ ${activity.price.toFixed(2)}`}
@@ -277,7 +287,7 @@ export default function ActivityDetailsTile({
             "
           >
             <Markdown>
-              {tokenParsed?.locale === "NL"
+              {isDutch
                 ? activity.dutchDescription || t("no_description_available_nl")
                 : activity.englishDescription ||
                   t("no_description_available_en")}
@@ -407,7 +417,7 @@ export default function ActivityDetailsTile({
           <Button
             variant="secondary"
             className="w-full sm:w-auto"
-            onClick={() => handleAddToCalendar(activity)}
+            onClick={() => handleAddToCalendar(activity, isDutch)}
           >
             <div className="flex items-center gap-2">
               <Calendar size={18} />

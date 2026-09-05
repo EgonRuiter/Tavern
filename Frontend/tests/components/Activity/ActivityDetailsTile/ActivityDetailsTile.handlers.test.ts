@@ -86,6 +86,24 @@ describe("handleAddToCalendar", () => {
     expect(decodeURIComponent(url)).toContain("calendar_copy_disclaimer");
     openSpy.mockRestore();
   });
+
+  it("uses the Dutch description when isDutch is true", () => {
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+    handleAddToCalendar(buildActivity(), true);
+
+    const url = openSpy.mock.calls[0][0] as string;
+    expect(decodeURIComponent(url)).toContain("Beschrijving");
+    openSpy.mockRestore();
+  });
+
+  it("uses the English description when isDutch is false", () => {
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+    handleAddToCalendar(buildActivity(), false);
+
+    const url = openSpy.mock.calls[0][0] as string;
+    expect(decodeURIComponent(url)).toContain("Description");
+    openSpy.mockRestore();
+  });
 });
 
 describe("handleEnrollment", () => {

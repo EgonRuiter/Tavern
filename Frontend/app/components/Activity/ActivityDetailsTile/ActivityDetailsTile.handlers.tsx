@@ -26,13 +26,19 @@ import {
  *
  * @param activity - The activity object containing name, description, location, and date details.
  */
-export const handleAddToCalendar = (activity: ActivityResponseDto) => {
+export const handleAddToCalendar = (
+  activity: ActivityResponseDto,
+  isDutch: boolean = true,
+) => {
   const title = encodeURIComponent(activity.name || "Activiteit");
   const disclaimer = t("calendar_copy_disclaimer", {
     datetime: new Date().toISOString(),
   });
+  const descriptionText = isDutch
+    ? activity.dutchDescription || activity.englishDescription
+    : activity.englishDescription || activity.dutchDescription;
   const description = encodeURIComponent(
-    `${formatForGoogleCalendar(activity.dutchDescription) || ""}\n\n[${disclaimer}]`,
+    `${formatForGoogleCalendar(descriptionText) || ""}\n\n[${disclaimer}]`,
   );
   const location = encodeURIComponent(activity.location || "TBA");
 
