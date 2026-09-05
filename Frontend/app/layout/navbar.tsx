@@ -99,6 +99,7 @@ export default function NavBarLayout() {
     avatarUrl: imgSrc,
     options: [
       { label: t("account"), href: "/account" },
+      { label: `🎁 ${t("sticky_wrapped")}`, href: "/wrapped" },
       ...(isBoard
         ? [
             {
