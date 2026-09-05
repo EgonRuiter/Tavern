@@ -80,8 +80,9 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
     setCanEdit(canEditActivity(activity, tokenParsed));
   }, [activity, tokenParsed]);
 
-  if (loading || !tokenParsed) return t("loading");
+  const isBoard = isBoardOrCandidateBoard(tokenParsed);
 
+  if (loading || !tokenParsed) return t("loading");
   if (activity == null) return t("failed_fetching");
 
   return (
@@ -91,7 +92,7 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
         backTo={getActivityBackPath(pathname)}
         action={
           activity &&
-          (canEdit || isBoardOrCandidateBoard(tokenParsed)) && (
+          (canEdit || isBoard) && (
             <div className="flex items-center gap-2">
               {canEdit && (
                 <Button
@@ -105,7 +106,7 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
                   <PencilIcon size={18} />
                 </Button>
               )}
-              {isBoardOrCandidateBoard(tokenParsed) && (
+              {isBoard && (
                 <Button
                   onClick={() =>
                     handleDeleteActivity(
@@ -129,24 +130,20 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
 
       <div className="space-y-6 w-full">
         <ActivityDetailsTile activity={activity} setActivity={setActivity} />
-        {activity.areParticipantsVisible && (
+        {(activity.areParticipantsVisible || isBoard) && (
           <>
             <ActivityParticipantsTile
               enrollments={
-                !activity.areParticipantsVisible
-                  ? []
-                  : (activity.enrollments.filter((e) => !e.isOnWaitingList) ??
-                    [])
+                activity.enrollments.filter((e) => !e.isOnWaitingList) ?? []
               }
+              isAdmin={isBoard}
             />
             <ActivityParticipantsTile
               title={t("waiting_list")}
               enrollments={
-                !activity.areParticipantsVisible
-                  ? []
-                  : (activity.enrollments.filter((e) => e.isOnWaitingList) ??
-                    [])
+                activity.enrollments.filter((e) => e.isOnWaitingList) ?? []
               }
+              isAdmin={isBoard}
             />
           </>
         )}

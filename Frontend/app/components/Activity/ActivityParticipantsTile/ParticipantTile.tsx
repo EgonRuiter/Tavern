@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import type { EnrollmentResponseDto } from "~/api/types.gen";
+import AuthContext from "~/context/AuthContext";
+import type { TokenParsed } from "~/types/TokenParsed";
 import { getEnv } from "~/util/config.utils";
+import { isBoardOrCandidateBoard } from "~/util/group.util";
 import { cn } from "~/util/tailwind.util";
 import Tile from "../../Tiles/Tile";
 
@@ -12,26 +16,40 @@ import Tile from "../../Tiles/Tile";
  * - **Profile Picture**: Fetches the member's profile picture or falls back to a default SVG.
  * - **Dynamic Answers**: If the enrollment contains multiple specification answers,
  *   it automatically cycles through them with a sliding animation every 3 seconds.
- * - **Hover Effects**: Includes subtle scaling and color transitions for better interactivity.
+ * - **Hover Effects**: Includes subtle scaling and color transitions for admins who can interact with it.
  * - **Honorary / Merit Recognition**: Displays a gold border and badge for honorary members and members of merit.
+ * - **Admin Interactivity**: Registered members are clickable for admins to open their details page.
  *
  * @component
  * @param {Object} props - The component props.
  * @param {EnrollmentResponseDto} props.enrollment - The enrollment data, including member details and specification answers.
- *
- * @example
- * ```tsx
- * <ParticipantTile
- *   enrollment={enrollmentData}
- * />
- * ```
+ * @param {boolean} [props.isAdmin] - Optional flag indicating whether the viewer has admin privileges.
  */
 export default function ParticipantTile({
   enrollment,
+  isAdmin: isAdminProp,
 }: {
   enrollment: EnrollmentResponseDto;
+  isAdmin?: boolean;
 }) {
   const { t } = useTranslation();
+  const authService = useContext(AuthContext);
+  const [tokenParsed, setTokenParsed] = useState<TokenParsed | null>(null);
+
+  useEffect(() => {
+    if (isAdminProp !== undefined || !authService) return;
+    let cancelled = false;
+    authService.getTokenParsed().then((token) => {
+      if (!cancelled) setTokenParsed(token);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [authService, isAdminProp]);
+
+  const isAdmin = isAdminProp ?? isBoardOrCandidateBoard(tokenParsed);
+  const isClickable = isAdmin && Boolean(enrollment.member.id);
+
   const imageUrl = `${getEnv("ApiUrl")}/profilepicture/view/${enrollment.member.profilePicturePath}`;
   const fallbackUrl = "/profile-picture.svg";
 
@@ -55,19 +73,28 @@ export default function ParticipantTile({
     return () => clearInterval(interval);
   }, [answers.length]);
 
-  return (
+  const tileContent = (
     <Tile
       className={cn(
-        "bg-slate-50 flex items-center gap-4 border transition-all group cursor-default",
+        "bg-slate-50 flex items-center gap-4 border transition-all",
+        isClickable ? "cursor-pointer" : "cursor-default",
         isHonoraryOrMerit
-          ? "border-amber-400 bg-amber-50/20 shadow-[0_0_0_1px_rgba(251,191,36,0.5)] hover:border-amber-500 hover:bg-amber-50/40"
-          : "border-transparent hover:border-slate-200 hover:bg-white",
+          ? cn(
+              "border-amber-400 bg-amber-50/20 shadow-[0_0_0_1px_rgba(251,191,36,0.5)]",
+              isClickable && "group-hover:border-amber-500 group-hover:bg-amber-50/40",
+            )
+          : cn(
+              "border-transparent",
+              isClickable && "group-hover:border-slate-200 group-hover:bg-white",
+            ),
       )}
     >
       <div className="relative flex-shrink-0">
         <div
           className={cn(
-            "w-12 h-12 rounded-full overflow-hidden flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-200 bg-(--board-primary)",
+            "w-12 h-12 rounded-full overflow-hidden flex items-center justify-center shadow-inner bg-(--board-primary)",
+            isClickable &&
+              "group-hover:scale-105 transition-transform duration-200",
             isHonoraryOrMerit && "ring-2 ring-amber-400 ring-offset-2",
           )}
         >
@@ -88,7 +115,13 @@ export default function ParticipantTile({
 
       <div className="overflow-hidden flex flex-col justify-center min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <p className="font-bold text-slate-900 truncate leading-tight group-hover:text-(--board-primary-dark) transition-colors">
+          <p
+            className={cn(
+              "font-bold text-slate-900 truncate leading-tight",
+              isClickable &&
+                "group-hover:text-(--board-primary-dark) transition-colors",
+            )}
+          >
             {enrollment.member.firstName} {enrollment.member.lastName}
           </p>
           {enrollment.member.ereLid && (
@@ -122,4 +155,17 @@ export default function ParticipantTile({
       </div>
     </Tile>
   );
+
+  if (isClickable) {
+    return (
+      <Link
+        to={`/admin/members/${enrollment.member.id}`}
+        className="block group"
+      >
+        {tileContent}
+      </Link>
+    );
+  }
+
+  return tileContent;
 }
