@@ -183,6 +183,7 @@ export default function NavBarLayout() {
           avatarUrl={profileOptions.avatarUrl}
           options={profileOptions.options}
           isHonoraryOrMerit={isHonoraryOrMerit}
+          userId={member?.id}
         />
       </NavBar>
       <main className="px-[5%] sm:px-[10%] py-5">

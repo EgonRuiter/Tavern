@@ -33,6 +33,7 @@ export type ProfileOptions = {
   onOptionSelect?: (option: ProfileDropdownOption) => void;
   onClose?: () => void;
   isHonoraryOrMerit?: boolean;
+  userId?: string | null;
 };
 
 /**
@@ -55,10 +56,48 @@ export default function ProfileDropdown({
   onOptionSelect,
   onClose,
   isHonoraryOrMerit = false,
+  userId,
 }: ProfileOptions) {
   const [isOpen, setIsOpen] = useState(false);
   const compact = React.useContext(context).compact;
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const [frame, setFrame] = useState<string>(() => {
+    if (typeof window !== "undefined" && userId) {
+      const saved = localStorage.getItem(`profile_frame_${userId}`);
+      if (saved === "gold" && isHonoraryOrMerit) return "gold";
+      if (saved && ["default", "primary"].includes(saved)) return saved;
+    }
+    return isHonoraryOrMerit ? "gold" : "default";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && userId) {
+      const saved = localStorage.getItem(`profile_frame_${userId}`);
+      if (saved === "gold" && isHonoraryOrMerit) {
+        setFrame("gold");
+        return;
+      }
+      if (saved && ["default", "primary"].includes(saved)) {
+        setFrame(saved);
+        return;
+      }
+    }
+    setFrame(isHonoraryOrMerit ? "gold" : "default");
+  }, [userId, isHonoraryOrMerit]);
+
+  useEffect(() => {
+    const handleFrameChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ userId: string; frame: string }>;
+      if (!userId || customEvent.detail?.userId === userId) {
+        setFrame(customEvent.detail?.frame || (isHonoraryOrMerit ? "gold" : "default"));
+      }
+    };
+    window.addEventListener("profile_frame_changed", handleFrameChange);
+    return () => {
+      window.removeEventListener("profile_frame_changed", handleFrameChange);
+    };
+  }, [userId, isHonoraryOrMerit]);
 
   // Close on outside click (desktop only)
   useEffect(() => {
@@ -70,6 +109,13 @@ export default function ProfileDropdown({
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [compact, isOpen]);
+
+  const ringClass =
+    frame === "gold"
+      ? "ring-2 ring-amber-400 ring-offset-1 ring-offset-(--board-primary)"
+      : frame === "primary"
+        ? "ring-2 ring-white ring-offset-1 ring-offset-(--board-primary)"
+        : "";
 
   return (
     <div ref={dropdownRef} className={compact ? "w-full" : "relative ml-5"}>
@@ -88,11 +134,7 @@ export default function ProfileDropdown({
         <img
           src={avatarUrl}
           alt={`${username} avatar`}
-          className={`w-8 h-8 rounded-full object-cover ${
-            isHonoraryOrMerit
-              ? "ring-2 ring-amber-400 ring-offset-1 ring-offset-(--board-primary)"
-              : ""
-          }`}
+          className={`w-8 h-8 rounded-full object-cover ${ringClass}`}
         />
         <span className="text-white font-bold text-sm">{username}</span>
       </button>
