@@ -2,7 +2,7 @@ import { t } from "i18next";
 import { PlusIcon } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import type {
   GroupMembershipResponseDto,
   MemberResponseDto,
@@ -97,7 +97,17 @@ export default function EditGroupPage() {
   const enrollmentColumns: Column<GroupMembershipResponseDto>[] = [
     {
       header: t("name"),
-      render: (item) => item.memberName,
+      render: (item) =>
+        item.memberId ? (
+          <Link
+            to={`/admin/members/${item.memberId}`}
+            className="text-slate-900 font-medium hover:text-(--board-primary) hover:underline transition-colors"
+          >
+            {item.memberName}
+          </Link>
+        ) : (
+          item.memberName
+        ),
     },
     {
       header: t("role"),

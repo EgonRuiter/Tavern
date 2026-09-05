@@ -439,4 +439,11 @@ describe("EditGroupPage", () => {
       expect(screen.queryByText("create-parent-role")).not.toBeInTheDocument(),
     );
   });
+
+  it("renders a link to the member's admin details page for each enrolled member", async () => {
+    renderPage(1);
+
+    const memberLink = await screen.findByRole("link", { name: "Jane Doe" });
+    expect(memberLink).toHaveAttribute("href", "/admin/members/m1");
+  });
 });

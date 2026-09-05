@@ -422,6 +422,7 @@ export default function EditMemberPage() {
             <GroupMembershipOverview
               groupMemberships={groupMemberships}
               emptyText={t("no_group_memberships")}
+              isClickable
             />
           </section>
 
