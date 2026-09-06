@@ -63,4 +63,20 @@ describe("ActivityParticipantsTile", () => {
     fireEvent.click(exportBtn);
     expect(onExport).toHaveBeenCalledTimes(1);
   });
+
+  it("renders export_pdf button and handles click when onExportPdf is provided", () => {
+    const onExportPdf = vi.fn();
+    render(
+      <ActivityParticipantsTile
+        enrollments={[buildEnrollment("Alice")]}
+        onExportPdf={onExportPdf}
+      />,
+    );
+
+    const exportPdfBtn = screen.getByRole("button", { name: /export_pdf/i });
+    expect(exportPdfBtn).toBeInTheDocument();
+
+    fireEvent.click(exportPdfBtn);
+    expect(onExportPdf).toHaveBeenCalledTimes(1);
+  });
 });

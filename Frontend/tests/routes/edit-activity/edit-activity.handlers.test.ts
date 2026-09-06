@@ -129,6 +129,7 @@ describe("loadEditActivityData", () => {
         posterPath: null,
         enrollments: [],
         isArchived: false,
+        showInKoala: false,
         specificationQuestions: [
           expect.objectContaining({
             id: undefined,

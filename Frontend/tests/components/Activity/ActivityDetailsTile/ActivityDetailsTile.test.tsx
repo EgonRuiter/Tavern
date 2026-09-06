@@ -33,14 +33,6 @@ vi.mock(
   }),
 );
 
-const { downloadActivityEnrollmentsCsv } = vi.hoisted(() => ({
-  downloadActivityEnrollmentsCsv: vi.fn(),
-}));
-
-vi.mock("~/util/activityCsv.util", () => ({
-  downloadActivityEnrollmentsCsv,
-}));
-
 vi.mock("~/components/Activity/AnswerQuestionsTile", () => ({
   default: ({
     onChange,
@@ -423,7 +415,7 @@ describe("ActivityDetailsTile", () => {
     expect(screen.getByText("#1")).toBeInTheDocument();
   });
 
-  it("renders export_csv button for board members and triggers download", async () => {
+  it("does not render export buttons in ActivityDetailsTile (delegated to participants tile)", async () => {
     const boardToken: TokenParsed = {
       ...memberToken,
       is_admin: true,
@@ -437,15 +429,11 @@ describe("ActivityDetailsTile", () => {
       authService,
     });
 
-    const exportBtn = await screen.findByRole("button", {
-      name: /export_csv/i,
-    });
-    expect(exportBtn).toBeInTheDocument();
-
-    fireEvent.click(exportBtn);
-    expect(downloadActivityEnrollmentsCsv).toHaveBeenCalledWith(
-      activity,
-      false,
-    );
+    expect(
+      screen.queryByRole("button", { name: /export_csv/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /export_pdf/i }),
+    ).not.toBeInTheDocument();
   });
 });

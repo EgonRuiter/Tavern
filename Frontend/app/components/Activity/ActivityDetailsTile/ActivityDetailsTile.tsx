@@ -5,8 +5,6 @@ import {
   Clock,
   Copy,
   Download,
-  FileSpreadsheet,
-  FileText,
   Image as ImageIcon,
   MapPin,
   Users,
@@ -29,16 +27,10 @@ import {
   getActivityEnrollmentStatus,
   hasEnrollmentOpened,
 } from "~/util/activity.util";
-import { downloadActivityEnrollmentsCsv } from "~/util/activityCsv.util";
 import { hasAllMandatoryAnswers } from "~/util/answer.util";
 import { getEnv } from "~/util/config.utils";
 import { formatDate } from "~/util/date.util";
-import {
-  hasPermission,
-  isBoardOrCandidateBoard,
-  isInGroupWithId,
-} from "~/util/group.util";
-import { generateParticipantChecklistPdf } from "~/util/pdf.util";
+import { hasPermission, isBoardOrCandidateBoard } from "~/util/group.util";
 import { capitalizeFirst } from "~/util/string.util";
 import { isMemberInTargetAudience } from "~/util/targetaudience.util";
 import BorderedTile from "../../Tiles/BorderedTile";
@@ -197,12 +189,6 @@ export default function ActivityDetailsTile({
   const waitingPosition = waitingIndex !== -1 ? waitingIndex + 1 : null;
   const aheadCount = waitingIndex !== -1 ? waitingIndex : null;
 
-  const isOrganizer =
-    !!activity.organizerId &&
-    tokenParsed !== null &&
-    (isInGroupWithId(tokenParsed, activity.organizerId) ||
-      hasPermission(tokenParsed, "EditActivityForGroup", activity.organizerId));
-  const canExport = isBoard || isOrganizer;
   const canClone =
     isBoard ||
     (tokenParsed
@@ -528,36 +514,6 @@ export default function ActivityDetailsTile({
               {t("download_ics")}
             </div>
           </Button>
-          {canExport && (
-            <>
-              <Button
-                variant="secondary"
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  downloadActivityEnrollmentsCsv(activity, isDutch);
-                  toast.success(t("csv_exported"));
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <FileSpreadsheet size={18} />
-                  {t("export_csv")}
-                </div>
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  generateParticipantChecklistPdf(activity, isDutch);
-                  toast.success(t("pdf_exported"));
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText size={18} />
-                  {t("export_pdf")}
-                </div>
-              </Button>
-            </>
-          )}
           {canClone && (
             <Button
               variant="secondary"

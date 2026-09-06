@@ -78,6 +78,7 @@ export const loadEditActivityData = async ({
         posterPath: null,
         enrollments: [],
         isArchived: false,
+        showInKoala: false,
         specificationQuestions: (source.specificationQuestions || []).map(
           (q) => ({
             ...q,
