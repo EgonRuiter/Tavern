@@ -1,24 +1,37 @@
 import type { ActivityResponseDto } from "~/api/types.gen";
+import { isAdminModeActive } from "~/context/AdminModeContext";
 import type { Permission } from "~/types/Permission";
 import type { TokenParsed } from "~/types/TokenParsed";
 
 /**
+ * Checks if the current user has genuine board member or admin privileges on their token.
+ * Does not respect the temporary client-side member view mode toggle.
+ */
+export const isActualBoardOrAdmin = (
+  tokenParsed: TokenParsed | null,
+): boolean => {
+  if (!tokenParsed) return false;
+  return tokenParsed.is_admin ?? false;
+};
+
+/**
  * Checks if the current user is a board member or candidate board member.
+ * If the user has switched to member view mode, this returns false so they can preview the site as a regular member.
  * @param tokenParsed The parsed token.
- * @returns True if the user is a board member or candidate board member, false otherwise.
+ * @returns True if the user is a board member and admin mode is active, false otherwise.
  */
 export const isBoardOrCandidateBoard = (
   tokenParsed: TokenParsed | null,
 ): boolean => {
   if (!tokenParsed) return false;
+  if (!tokenParsed.is_admin) return false;
 
-  return tokenParsed.is_admin ?? false;
+  return isAdminModeActive();
 };
 
 /**
  * Checks if the current user is in a specific group by ID, in the current committee year.
  * @param tokenParsed The parsed token.
- * @param groupId The ID of the group to check.
  * @returns True if the user is in the specified group, false otherwise.
  */
 export const isInGroupWithId = (
@@ -52,6 +65,21 @@ export const hasPermission = (
 ): boolean => {
   if (isBoardOrCandidateBoard(tokenParsed)) return true;
   if (!tokenParsed?.group_memberships) return false;
+
+  if (!isAdminModeActive()) {
+    const ADMIN_PERMISSIONS = new Set<Permission>([
+      "EditAllActivities",
+      "ManageMembers",
+      "ViewMembers",
+      "ManageGroups",
+      "ManageRoles",
+      "ManageRolePermissions",
+      "ManageFinances",
+      "ViewFinances",
+      "EditAnnouncements",
+    ]);
+    if (ADMIN_PERMISSIONS.has(permission)) return false;
+  }
 
   const memberships =
     GROUP_SCOPED_PERMISSIONS.has(permission) && groupId !== undefined

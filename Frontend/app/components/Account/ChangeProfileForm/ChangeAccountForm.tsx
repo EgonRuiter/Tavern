@@ -12,6 +12,8 @@ import { FormHeader } from "~/components/UI/Form/FormHeader";
 import { FormSection } from "~/components/UI/Form/FormSection";
 import Input from "~/components/UI/Input";
 import ThemeToggle from "~/components/UI/ThemeToggle";
+import AdminModeToggle from "~/components/UI/AdminModeToggle";
+import { useAdminMode } from "~/context/AdminModeContext";
 import { useApp } from "~/context/AppContext";
 import { useAuth } from "~/context/AuthContext";
 import { getEnv } from "~/util/config.utils";
@@ -38,6 +40,7 @@ export default function ChangeAccountForm({
 }) {
   const authService = useAuth();
   const { setMember } = useApp();
+  const { isAdminUser } = useAdminMode();
   const [saving, setSaving] = useState(false);
   const [loadingMailingLists, setLoadingMailingLists] = useState(false);
   const [mailingListsUnavailable, setMailingListsUnavailable] = useState(false);
@@ -288,6 +291,13 @@ export default function ChangeAccountForm({
           <FormHeader title={t("theme")} border={false} />
           <ThemeToggle variant="segmented" />
         </div>
+
+        {isAdminUser && (
+          <div className="md:col-span-2">
+            <FormHeader title={t("view_mode")} border={false} />
+            <AdminModeToggle variant="segmented" />
+          </div>
+        )}
       </FormSection>
 
       <FormSection columns={1}>

@@ -701,6 +701,16 @@
   "archived_activity_badge": "Archived",
   "archived_activity_notice": "This activity is archived and hidden from regular members.",
   "export_pdf": "Printable list (PDF)",
-  "pdf_exported": "PDF checklist downloaded"
+  "pdf_exported": "PDF checklist downloaded",
+  "admin_mode": "Admin mode",
+  "member_mode": "Member view",
+  "view_mode": "View mode",
+  "member_mode_active": "Member view active",
+  "admin_mode_active": "Admin mode active",
+  "switch_to_admin_mode": "Switch to admin mode",
+  "switch_to_member_mode": "Switch to member view",
+  "member_view_banner_text": "Member view active: You are currently viewing Koala as a regular member.",
+  "admin_mode_description": "Full administrator privileges active.",
+  "member_mode_description": "Administrative controls hidden. You see the app as a regular member."
 }
 

@@ -18,6 +18,7 @@ import "./app.css";
 import { t } from "i18next";
 import Cookies from "js-cookie";
 import FaviconHandler from "./components/FavIconHandler";
+import { AdminModeProvider } from "./context/AdminModeContext";
 import { AppProvider } from "./context/AppContext";
 import { getActiveAuthService } from "./layout/auth-service";
 import { getEnv } from "./util/config.utils";
@@ -213,11 +214,13 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <AppProvider>
-        <FaviconHandler />
-        {isClient && <Toaster position="bottom-right" />}
-        <Outlet />
-      </AppProvider>
+      <AdminModeProvider>
+        <AppProvider>
+          <FaviconHandler />
+          {isClient && <Toaster position="bottom-right" />}
+          <Outlet />
+        </AppProvider>
+      </AdminModeProvider>
     </ThemeProvider>
   );
 }

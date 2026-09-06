@@ -3,12 +3,14 @@ import {
   CalendarDays,
   LayoutDashboard,
   SquareArrowOutUpRight,
+  User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router";
 import { getMembersByIdProfilePicture } from "~/api";
 import NavBar from "~/components/Menu/NavBar/NavBar";
+import { useAdminMode } from "~/context/AdminModeContext";
 import { useApp } from "~/context/AppContext";
 import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
@@ -187,6 +189,7 @@ export default function NavBarLayout() {
   ];
 
   const { member } = useApp();
+  const { isAdminUser, adminMode, toggleAdminMode } = useAdminMode();
   const isHonoraryOrMerit = Boolean(
     member?.ereLid || member?.lidVanVerdienste,
   );
@@ -209,8 +212,26 @@ export default function NavBarLayout() {
           userId={member?.id}
         />
       </NavBar>
+      {isAdminUser && !adminMode && (
+        <aside
+          aria-label={t("member_mode_active")}
+          className="bg-amber-500 text-white px-[5%] sm:px-[10%] py-2 text-xs sm:text-sm font-medium flex items-center justify-between shadow-xs"
+        >
+          <div className="flex items-center gap-2">
+            <User size={16} className="shrink-0" />
+            <span>{t("member_view_banner_text")}</span>
+          </div>
+          <button
+            type="button"
+            onClick={toggleAdminMode}
+            className="bg-white text-amber-900 px-3 py-1 rounded-md font-semibold text-xs hover:bg-amber-50 transition-colors cursor-pointer shrink-0 ml-3"
+          >
+            {t("switch_to_admin_mode")}
+          </button>
+        </aside>
+      )}
       <main className="px-[5%] sm:px-[10%] py-5">
-        <Outlet />
+        <Outlet key={adminMode ? "admin" : "member"} />
       </main>
     </div>
   );

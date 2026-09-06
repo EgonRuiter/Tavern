@@ -5,6 +5,8 @@ import {
   handleOptionClick,
   toggleDropdown,
 } from "./ProfileDropdown.handlers";
+import ThemeToggle from "~/components/UI/ThemeToggle";
+import AdminModeToggle from "~/components/UI/AdminModeToggle";
 
 /**
  * Context values required to control the dropdown's layout behavior.
@@ -180,6 +182,20 @@ export default function ProfileDropdown({
               {option.label}
             </NavLink>
           ))}
+          <div
+            className={`border-t ${
+              compact ? "border-white/10" : "border-gray-100"
+            }`}
+          >
+            <ThemeToggle
+              variant="dropdown"
+              className={compact ? "[&>span]:text-white/80" : ""}
+            />
+            <AdminModeToggle
+              variant="dropdown"
+              className={compact ? "[&>span]:text-white/80" : ""}
+            />
+          </div>
         </div>
       )}
     </div>
