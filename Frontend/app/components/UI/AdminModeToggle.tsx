@@ -23,27 +23,37 @@ export default function AdminModeToggle({
   if (variant === "dropdown") {
     return (
       <div className={`flex items-center justify-between p-2 text-xs ${className}`}>
-        <span className="text-gray-500 font-medium flex items-center gap-1.5">
-          <User size={14} />
-          {t("member_mode")}
+        <span className="text-gray-500 font-medium">
+          {t("view_mode")}
         </span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={!adminMode}
-          onClick={toggleAdminMode}
-          aria-label={t("member_mode")}
-          title={!adminMode ? t("switch_to_admin_mode") : t("switch_to_member_mode")}
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-            !adminMode ? "bg-(--board-primary)" : "bg-gray-200"
-          }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
-              !adminMode ? "translate-x-4" : "translate-x-0"
+        <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
+          <button
+            type="button"
+            onClick={() => setAdminMode(true)}
+            title={t("admin_mode")}
+            aria-label={t("admin_mode")}
+            className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+              adminMode
+                ? "bg-white text-(--board-primary) shadow-xs"
+                : "text-gray-500 hover:text-gray-900"
             }`}
-          />
-        </button>
+          >
+            <ShieldCheck size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setAdminMode(false)}
+            title={t("member_mode")}
+            aria-label={t("member_mode")}
+            className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+              !adminMode
+                ? "bg-white text-(--board-primary) shadow-xs"
+                : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            <User size={14} />
+          </button>
+        </div>
       </div>
     );
   }

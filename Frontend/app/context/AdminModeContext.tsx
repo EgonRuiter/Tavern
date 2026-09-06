@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useAuth } from "./AuthContext";
+import AuthContext from "./AuthContext";
 
 export const ADMIN_MODE_STORAGE_KEY = "tavern_admin_mode";
 export const ADMIN_MODE_CHANGED_EVENT = "tavern_admin_mode_changed";
@@ -24,19 +24,28 @@ const AdminModeContext = createContext<AdminModeContextType>({
 });
 
 export function AdminModeProvider({ children }: { children: React.ReactNode }) {
-  const authService = useAuth();
+  const authService = useContext(AuthContext);
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [adminMode, setAdminModeState] = useState<boolean>(() =>
     isAdminModeActive(),
   );
 
   useEffect(() => {
+    if (!authService) {
+      setIsAdminUser(false);
+      return;
+    }
+
     let cancelled = false;
     const checkAdmin = async () => {
       try {
         const token = await authService.getTokenParsed();
-        if (!cancelled) {
-          setIsAdminUser(Boolean(token?.is_admin));
+        if (!cancelled && token) {
+          setIsAdminUser(
+            Boolean(
+              token.is_admin === true || (token.is_admin as any) === "true",
+            ),
+          );
         }
       } catch {
         if (!cancelled) {
@@ -44,9 +53,15 @@ export function AdminModeProvider({ children }: { children: React.ReactNode }) {
         }
       }
     };
+
     void checkAdmin();
+    const interval = setInterval(() => {
+      void checkAdmin();
+    }, 1000);
+
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, [authService]);
 

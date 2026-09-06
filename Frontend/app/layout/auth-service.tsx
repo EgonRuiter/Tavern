@@ -4,6 +4,8 @@ import type { IAuthService } from "~/auth/IAuthService";
 import { KeycloakAuthService } from "~/auth/KeycloakService";
 import { getEnv } from "~/util/config.utils";
 
+import { AdminModeProvider } from "~/context/AdminModeContext";
+
 let activeAuthService: IAuthService | null = null;
 
 /**
@@ -39,7 +41,9 @@ export default function AuthServiceLayout() {
 
   return (
     <Provider>
-      <Outlet />
+      <AdminModeProvider>
+        <Outlet />
+      </AdminModeProvider>
     </Provider>
   );
 }

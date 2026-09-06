@@ -97,14 +97,15 @@ describe("AdminModeToggle", () => {
   it("renders dropdown variant and toggles on click", async () => {
     renderWithAdminMode(<AdminModeToggle variant="dropdown" />);
 
-    const toggle = await screen.findByRole("switch");
-    expect(toggle).toBeInTheDocument();
-    expect(screen.getByText("member_mode")).toBeInTheDocument();
+    expect(await screen.findByText("view_mode")).toBeInTheDocument();
+    const memberBtn = screen.getByRole("button", { name: "member_mode" });
+    expect(memberBtn).toBeInTheDocument();
 
-    fireEvent.click(toggle);
+    fireEvent.click(memberBtn);
     expect(localStorage.getItem(ADMIN_MODE_STORAGE_KEY)).toBe("false");
 
-    fireEvent.click(toggle);
+    const adminBtn = screen.getByRole("button", { name: "admin_mode" });
+    fireEvent.click(adminBtn);
     expect(localStorage.getItem(ADMIN_MODE_STORAGE_KEY)).toBe("true");
   });
 });
