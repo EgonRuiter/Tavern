@@ -711,6 +711,9 @@
   "switch_to_member_mode": "Switch to member view",
   "member_view_banner_text": "Member view active: You are currently viewing Koala as a regular member.",
   "admin_mode_description": "Full administrator privileges active.",
-  "member_mode_description": "Administrative controls hidden. You see the app as a regular member."
+  "member_mode_description": "Administrative controls hidden. You see the app as a regular member.",
+  "active_activities": "Active activities",
+  "archived_activities": "Archived activities",
+  "no_archived_activities": "No archived activities found"
 }
 

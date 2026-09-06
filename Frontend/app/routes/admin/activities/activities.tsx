@@ -66,6 +66,9 @@ export default function Activities() {
   const [year, setYear] = useState(currentYear);
   const [activities, setActivities] = useState<ActivityResponseDto[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"active" | "archived">(
+    "active",
+  );
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -76,8 +79,15 @@ export default function Activities() {
     (_, i) => currentYear - i,
   );
 
+  const isArchivedQuery = statusFilter === "archived";
+
   const fetchActivities = useCallback(
-    async (pageNum: number, isInitial: boolean, targetYear: number) => {
+    async (
+      pageNum: number,
+      isInitial: boolean,
+      targetYear: number,
+      targetArchived: boolean,
+    ) => {
       loadAdminActivities(
         targetYear,
         setLoading,
@@ -92,6 +102,7 @@ export default function Activities() {
         pageNum,
         PAGE_SIZE,
         canViewPastActivities,
+        targetArchived,
       );
     },
     [canViewPastActivities],
@@ -118,12 +129,13 @@ export default function Activities() {
       1,
       PAGE_SIZE,
       canViewPastActivities,
+      isArchivedQuery,
     );
 
     return () => {
       isCurrent = false;
     };
-  }, [year, tokenParsed, canViewPastActivities]);
+  }, [year, tokenParsed, canViewPastActivities, isArchivedQuery]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -131,7 +143,7 @@ export default function Activities() {
         if (entries[0].isIntersecting && hasMore && !loading) {
           const nextPage = page + 1;
           setPage(nextPage);
-          fetchActivities(nextPage, false, year);
+          fetchActivities(nextPage, false, year, isArchivedQuery);
         }
       },
       { threshold: 1.0 },
@@ -142,7 +154,7 @@ export default function Activities() {
     }
 
     return () => observer.disconnect();
-  }, [hasMore, loading, page, year, fetchActivities]);
+  }, [hasMore, loading, page, year, isArchivedQuery, fetchActivities]);
 
   const filteredActivities = useMemo(() => {
     if (!activities) return [];
@@ -289,11 +301,7 @@ export default function Activities() {
                   toast.error(t("failed_updating"));
                   return;
                 }
-                setActivities((prev) =>
-                  prev.map((a) =>
-                    a.id === act.id ? { ...a, isArchived: nextArchived } : a,
-                  ),
-                );
+                setActivities((prev) => prev.filter((a) => a.id !== act.id));
                 toast.success(
                   nextArchived
                     ? t("activity_archived")
@@ -355,6 +363,20 @@ export default function Activities() {
           </div>
           <div className="flex flex-col w-full sm:w-auto">
             <Select
+              options={[
+                { label: t("active_activities"), value: "active" },
+                { label: t("archived_activities"), value: "archived" },
+              ]}
+              label={t("status")}
+              style={{ minWidth: "160px" }}
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as "active" | "archived")
+              }
+            />
+          </div>
+          <div className="flex flex-col w-full sm:w-auto">
+            <Select
               options={yearsSince2007.map((y) => ({
                 label: `${y - 1}/${y}`,
                 value: y,
@@ -368,41 +390,63 @@ export default function Activities() {
         </div>
       </BorderedTile>
 
-      <section className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-bold text-slate-800">
-            {t("published_activities")}
-          </h2>
-          <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full font-bold">
-            {publishedActivities.length}
-          </span>
-        </div>
-        <BorderedTile className="bg-white p-0">
-          <DataTable
-            data={publishedActivities}
-            columns={columns}
-            emptyText={t("no_published_activities")}
-          />
-        </BorderedTile>
-      </section>
+      {statusFilter === "archived" ? (
+        <section className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold text-slate-800">
+              {t("archived_activities")}
+            </h2>
+            <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full font-bold">
+              {filteredActivities.length}
+            </span>
+          </div>
+          <BorderedTile className="bg-white p-0">
+            <DataTable
+              data={filteredActivities}
+              columns={columns}
+              emptyText={t("no_archived_activities")}
+            />
+          </BorderedTile>
+        </section>
+      ) : (
+        <>
+          <section className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-800">
+                {t("published_activities")}
+              </h2>
+              <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full font-bold">
+                {publishedActivities.length}
+              </span>
+            </div>
+            <BorderedTile className="bg-white p-0">
+              <DataTable
+                data={publishedActivities}
+                columns={columns}
+                emptyText={t("no_published_activities")}
+              />
+            </BorderedTile>
+          </section>
 
-      <section className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-bold text-slate-800">
-            {t("unpublished_activities")}
-          </h2>
-          <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full font-bold">
-            {unpublishedActivities.length}
-          </span>
-        </div>
-        <BorderedTile className="bg-white p-0">
-          <DataTable
-            data={unpublishedActivities}
-            columns={columns}
-            emptyText={t("no_unpublished_activities")}
-          />
-        </BorderedTile>
-      </section>
+          <section className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-800">
+                {t("unpublished_activities")}
+              </h2>
+              <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full font-bold">
+                {unpublishedActivities.length}
+              </span>
+            </div>
+            <BorderedTile className="bg-white p-0">
+              <DataTable
+                data={unpublishedActivities}
+                columns={columns}
+                emptyText={t("no_unpublished_activities")}
+              />
+            </BorderedTile>
+          </section>
+        </>
+      )}
 
       <div ref={loaderRef} className="h-10 flex items-center justify-center">
         <span className="text-slate-400 text-sm">

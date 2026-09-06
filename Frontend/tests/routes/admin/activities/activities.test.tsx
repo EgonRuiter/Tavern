@@ -90,6 +90,7 @@ describe("Activities (admin)", () => {
       1,
       15,
       false,
+      false,
     );
   });
 
@@ -175,6 +176,7 @@ describe("Activities (admin)", () => {
       1,
       15,
       false,
+      false,
     );
   });
 
@@ -230,6 +232,7 @@ describe("Activities (admin)", () => {
       expect.any(Function),
       2,
       15,
+      false,
       false,
     );
   });
@@ -460,6 +463,60 @@ describe("Activities (admin)", () => {
 
     expect(unpublishedSection).toHaveTextContent("Draft Workshop");
     expect(unpublishedSection).not.toHaveTextContent("Published Gala");
+  });
+
+  it("switches status to archived and renders archived section with unarchive button", async () => {
+    loadAdminActivities.mockImplementation(
+      async (
+        _year,
+        setLoading,
+        setActivities,
+        _page,
+        _pageSize,
+        _past,
+        isArchived,
+      ) => {
+        if (isArchived) {
+          setActivities([
+            makeActivity({
+              id: 99,
+              name: "Old Archived Gala",
+              isArchived: true,
+            }),
+          ]);
+        } else {
+          setActivities([
+            makeActivity({
+              id: 1,
+              name: "Active Gala",
+              isArchived: false,
+              showInKoala: true,
+            }),
+          ]);
+        }
+        setLoading(false);
+      },
+    );
+
+    renderWithProviders(<Activities />, { authService: boardAuthService });
+
+    expect(await screen.findByText("Active Gala")).toBeInTheDocument();
+    expect(screen.queryByText("Old Archived Gala")).not.toBeInTheDocument();
+
+    const statusSelect = screen.getByLabelText("status");
+    fireEvent.change(statusSelect, { target: { value: "archived" } });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: "archived_activities" }),
+      ).toBeInTheDocument();
+    });
+
+    expect(await screen.findByText("Old Archived Gala")).toBeInTheDocument();
+    expect(screen.queryByText("Active Gala")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "unarchive_activity" }),
+    ).toBeInTheDocument();
   });
 });
 
