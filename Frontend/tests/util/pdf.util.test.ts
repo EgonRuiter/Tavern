@@ -160,6 +160,7 @@ describe("generateParticipantChecklistPdf", () => {
     enrollments: [
       {
         isOnWaitingList: false,
+        registeredOn: "2026-01-01T00:00:00Z",
         member: {
           id: "m1",
           firstName: "Jan",
@@ -171,6 +172,7 @@ describe("generateParticipantChecklistPdf", () => {
       },
       {
         isOnWaitingList: true,
+        registeredOn: "2026-01-01T00:00:00Z",
         member: {
           id: "m2",
           firstName: "Piet",

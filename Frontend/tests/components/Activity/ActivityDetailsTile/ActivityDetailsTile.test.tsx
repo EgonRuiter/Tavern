@@ -402,6 +402,7 @@ describe("ActivityDetailsTile", () => {
       enrollments: [
         {
           isOnWaitingList: true,
+          registeredOn: "2026-01-01T00:00:00Z",
           member: { id: memberToken.UserId, firstName: "Test", lastName: "User" } as any,
           activity: null!,
         },
