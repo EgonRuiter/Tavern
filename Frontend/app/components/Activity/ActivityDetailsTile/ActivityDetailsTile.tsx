@@ -2,6 +2,7 @@ import {
   Calendar,
   Clock,
   Download,
+  FileSpreadsheet,
   Image as ImageIcon,
   MapPin,
   Users,
@@ -22,10 +23,11 @@ import {
   getActivityEnrollmentStatus,
   hasEnrollmentOpened,
 } from "~/util/activity.util";
+import { downloadActivityEnrollmentsCsv } from "~/util/activityCsv.util";
 import { hasAllMandatoryAnswers } from "~/util/answer.util";
 import { getEnv } from "~/util/config.utils";
 import { formatDate } from "~/util/date.util";
-import { isBoardOrCandidateBoard } from "~/util/group.util";
+import { canEditActivity, isBoardOrCandidateBoard } from "~/util/group.util";
 import { isMemberInTargetAudience } from "~/util/targetaudience.util";
 import BorderedTile from "../../Tiles/BorderedTile";
 import Button from "../../UI/Button";
@@ -168,6 +170,18 @@ export default function ActivityDetailsTile({
   const isEnrolled = !!currentEnrollment;
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const isBoard = isBoardOrCandidateBoard(tokenParsed);
+
+  const waitingListEnrollments = (activity.enrollments || []).filter(
+    (e) => e.isOnWaitingList,
+  );
+  const waitingIndex = tokenParsed
+    ? waitingListEnrollments.findIndex((e) => e.member?.id === tokenParsed.UserId)
+    : -1;
+  const waitingPosition = waitingIndex !== -1 ? waitingIndex + 1 : null;
+  const aheadCount = waitingIndex !== -1 ? waitingIndex : null;
+
+  const canExport =
+    isBoard || (tokenParsed ? canEditActivity(activity, tokenParsed) : false);
 
   useEffect(() => {
     setAnswers(toAnswerMap(currentEnrollment?.specificationAnswers));
@@ -365,6 +379,29 @@ export default function ActivityDetailsTile({
           />
         )}
 
+        {/* Waiting List Position Indicator */}
+        {currentEnrollment?.isOnWaitingList && waitingPosition !== null && (
+          <div className="flex items-center gap-3 p-3.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-900 shadow-2xs">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-200/80 text-amber-800 shrink-0 font-bold text-sm">
+              #{waitingPosition}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">
+                {t("waiting_list_position", { position: waitingPosition })}
+              </span>
+              <span className="text-xs text-amber-700">
+                {aheadCount === 0
+                  ? isDutch
+                    ? "Je bent de eerstvolgende zodra er een plek vrijkomt!"
+                    : "You are next in line if a spot opens up!"
+                  : aheadCount === 1
+                    ? t("waiting_list_ahead", { count: aheadCount })
+                    : t("waiting_list_ahead_plural", { count: aheadCount })}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex flex-col gap-3 pt-4 border-t border-gray-200">
           {isEnrolled
@@ -430,7 +467,7 @@ export default function ActivityDetailsTile({
           >
             <div className="flex items-center gap-2">
               <Calendar size={18} />
-              {t("copy_once_to_calendar")}
+              {t("add_to_google_calendar")}
             </div>
           </Button>
           <Button
@@ -443,6 +480,21 @@ export default function ActivityDetailsTile({
               {t("download_ics")}
             </div>
           </Button>
+          {canExport && (
+            <Button
+              variant="secondary"
+              className="w-full sm:w-auto"
+              onClick={() => {
+                downloadActivityEnrollmentsCsv(activity, isDutch);
+                toast.success(t("csv_exported"));
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet size={18} />
+                {t("export_csv")}
+              </div>
+            </Button>
+          )}
         </div>
       </div>
     </div>

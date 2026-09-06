@@ -33,6 +33,14 @@ vi.mock(
   }),
 );
 
+const { downloadActivityEnrollmentsCsv } = vi.hoisted(() => ({
+  downloadActivityEnrollmentsCsv: vi.fn(),
+}));
+
+vi.mock("~/util/activityCsv.util", () => ({
+  downloadActivityEnrollmentsCsv,
+}));
+
 vi.mock("~/components/Activity/AnswerQuestionsTile", () => ({
   default: ({
     onChange,
@@ -210,7 +218,7 @@ describe("ActivityDetailsTile", () => {
 
   it("calls handleAddToCalendar when the calendar button is clicked", async () => {
     renderWithProviders(<ActivityDetailsTile activity={buildActivity()} />);
-    fireEvent.click(await screen.findByText("copy_once_to_calendar"));
+    fireEvent.click(await screen.findByText("add_to_google_calendar"));
     expect(handleAddToCalendar).toHaveBeenCalled();
   });
 
@@ -307,7 +315,7 @@ describe("ActivityDetailsTile", () => {
       />,
     );
     expect(
-      await screen.findByText("copy_once_to_calendar"),
+      await screen.findByText("add_to_google_calendar"),
     ).toBeInTheDocument();
     expect(screen.queryByText("sign_in")).not.toBeInTheDocument();
     expect(screen.queryByText("participants")).not.toBeInTheDocument();
@@ -331,7 +339,7 @@ describe("ActivityDetailsTile", () => {
       />,
     );
     expect(
-      await screen.findByText("copy_once_to_calendar"),
+      await screen.findByText("add_to_google_calendar"),
     ).toBeInTheDocument();
     expect(screen.queryByText("sign_in")).not.toBeInTheDocument();
     expect(screen.getByText("participants")).toBeInTheDocument();
@@ -356,7 +364,7 @@ describe("ActivityDetailsTile", () => {
   it("does not show an organizer info item when the activity has no organizer", async () => {
     renderWithProviders(<ActivityDetailsTile activity={buildActivity()} />);
 
-    await screen.findByText("copy_once_to_calendar");
+    await screen.findByText("add_to_google_calendar");
     expect(getGroupsById).not.toHaveBeenCalled();
     expect(screen.queryByText("organizer")).not.toBeInTheDocument();
   });
@@ -384,5 +392,50 @@ describe("ActivityDetailsTile", () => {
     fireEvent.click(downloadBtn);
 
     expect(handleDownloadIcs).toHaveBeenCalledWith(activity, false);
+  });
+
+  it("displays waiting list position indicator when user is on the waiting list", async () => {
+    const authService = createMockAuthService({
+      getTokenParsed: vi.fn(async () => memberToken),
+    });
+    const activity = buildActivity({
+      enrollments: [
+        {
+          isOnWaitingList: true,
+          member: { id: memberToken.UserId, firstName: "Test", lastName: "User" } as any,
+          activity: null!,
+        },
+      ],
+    });
+
+    renderWithProviders(<ActivityDetailsTile activity={activity} />, {
+      authService,
+    });
+
+    expect(await screen.findByText(/waiting_list_position/i)).toBeInTheDocument();
+    expect(screen.getByText("#1")).toBeInTheDocument();
+  });
+
+  it("renders export_csv button for board members and triggers download", async () => {
+    const boardToken: TokenParsed = {
+      ...memberToken,
+      is_admin: true,
+    };
+    const authService = createMockAuthService({
+      getTokenParsed: vi.fn(async () => boardToken),
+    });
+    const activity = buildActivity();
+
+    renderWithProviders(<ActivityDetailsTile activity={activity} />, {
+      authService,
+    });
+
+    const exportBtn = await screen.findByRole("button", {
+      name: /export_csv/i,
+    });
+    expect(exportBtn).toBeInTheDocument();
+
+    fireEvent.click(exportBtn);
+    expect(downloadActivityEnrollmentsCsv).toHaveBeenCalledWith(activity, false);
   });
 });

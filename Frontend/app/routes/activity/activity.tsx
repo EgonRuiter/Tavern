@@ -8,9 +8,11 @@ import ActivityParticipantsTile from "~/components/Activity/ActivityParticipants
 import Button from "~/components/UI/Button";
 import { useConfirm } from "~/components/UI/ConfirmModal/useConfirm";
 import { PageHeader } from "~/components/UI/PageHeader";
+import toast from "react-hot-toast";
 import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
 import { hasEnrollmentOpened } from "~/util/activity.util";
+import { downloadActivityEnrollmentsCsv } from "~/util/activityCsv.util";
 import { canEditActivity, isBoardOrCandidateBoard } from "~/util/group.util";
 import type { Route } from "./+types/activity";
 import {
@@ -138,6 +140,19 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
                 activity.enrollments.filter((e) => !e.isOnWaitingList) ?? []
               }
               isAdmin={isBoard}
+              onExportCsv={
+                canEdit || isBoard
+                  ? () => {
+                      downloadActivityEnrollmentsCsv(
+                        activity,
+                        (tokenParsed?.locale || "nl")
+                          .toLowerCase()
+                          .startsWith("nl"),
+                      );
+                      toast.success(t("csv_exported"));
+                    }
+                  : undefined
+              }
             />
             <ActivityParticipantsTile
               title={t("waiting_list")}

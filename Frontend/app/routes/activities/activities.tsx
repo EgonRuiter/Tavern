@@ -5,6 +5,7 @@ import {
   DownloadIcon,
   MenuIcon,
   PlusIcon,
+  Search,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
@@ -166,6 +167,7 @@ export default function ActivitiesPage() {
   const [activities, setActivities] = useState<ActivityResponseDto[]>([]);
   const [calendarTileOpen, setCalendarTileOpen] = useState(false);
   const [filter, setFilter] = useState<ActivityFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!tokenParsed) return;
@@ -178,6 +180,14 @@ export default function ActivitiesPage() {
   }, [tokenParsed, filter]);
 
   if (!tokenParsed) return null;
+
+  const filteredActivities = activities.filter((activity) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    const nameMatch = activity.name?.toLowerCase().includes(q);
+    const locationMatch = activity.location?.toLowerCase().includes(q);
+    return Boolean(nameMatch || locationMatch);
+  });
 
   const canCreateActivity =
     isBoardOrCandidateBoard(tokenParsed) ||
@@ -228,44 +238,58 @@ export default function ActivitiesPage() {
         <PersonalCalendarTile />
       </Modal>
 
-      {/* Activities Filter Tabs */}
-      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
-        <button
-          type="button"
-          onClick={() => setFilter("all")}
-          className={cn(
-            "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
-            filter === "all"
-              ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
-          )}
-        >
-          {t("all_activities")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilter("enrolled")}
-          className={cn(
-            "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
-            filter === "enrolled"
-              ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
-          )}
-        >
-          {t("my_enrollments")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilter("history")}
-          className={cn(
-            "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
-            filter === "history"
-              ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
-          )}
-        >
-          {t("enrolled_history")}
-        </button>
+      {/* Activities Filter Tabs & Search Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+          <button
+            type="button"
+            onClick={() => setFilter("all")}
+            className={cn(
+              "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
+              filter === "all"
+                ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
+            )}
+          >
+            {t("all_activities")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter("enrolled")}
+            className={cn(
+              "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
+              filter === "enrolled"
+                ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
+            )}
+          >
+            {t("my_enrollments")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter("history")}
+            className={cn(
+              "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
+              filter === "history"
+                ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
+            )}
+          >
+            {t("enrolled_history")}
+          </button>
+        </div>
+
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("search_activities")}
+            aria-label={t("search_activities")}
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-(--board-primary) focus:border-(--board-primary) text-gray-800 placeholder-gray-400 shadow-2xs"
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -280,9 +304,11 @@ export default function ActivitiesPage() {
                 : t("no_upcoming_activities")
           }
         />
+      ) : filteredActivities.length === 0 ? (
+        <NoContentTile text={t("no_activities_found")} />
       ) : (
         <div className="grid gap-4 justify-center grid-cols-[repeat(auto-fill,minmax(250px,1fr))] w-full">
-          {activities.map((activity) => (
+          {filteredActivities.map((activity) => (
             <ActivityTile
               key={activity.id}
               className="w-auto"

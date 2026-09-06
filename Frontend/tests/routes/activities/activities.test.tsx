@@ -241,4 +241,36 @@ describe("ActivitiesPage", () => {
       ),
     );
   });
+
+  it("filters activities based on the search query", async () => {
+    vi.mocked(loadActivities).mockImplementation(
+      async ({ setLoading, setActivities }) => {
+        setActivities([
+          { id: 1, name: "Pizza Night", location: "Sticky Room" } as any,
+          { id: 2, name: "Lan Party", location: "Main Hall" } as any,
+        ]);
+        setLoading(false);
+      },
+    );
+    const authService = createMockAuthService({
+      getToken: vi.fn(async () => "tok"),
+      getTokenParsed: vi.fn(async () => memberToken),
+    });
+    renderWithProviders(<ActivitiesPage />, { authService });
+
+    expect(await screen.findByText("activity-tile-1")).toBeInTheDocument();
+    expect(screen.getByText("activity-tile-2")).toBeInTheDocument();
+
+    const searchInput = screen.getByRole("textbox", {
+      name: /search_activities/i,
+    });
+    fireEvent.change(searchInput, { target: { value: "pizza" } });
+
+    expect(screen.getByText("activity-tile-1")).toBeInTheDocument();
+    expect(screen.queryByText("activity-tile-2")).not.toBeInTheDocument();
+
+    fireEvent.change(searchInput, { target: { value: "nonexistent" } });
+    expect(screen.queryByText("activity-tile-1")).not.toBeInTheDocument();
+    expect(screen.getByText("no_activities_found")).toBeInTheDocument();
+  });
 });

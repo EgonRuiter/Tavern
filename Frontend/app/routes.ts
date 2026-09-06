@@ -28,7 +28,6 @@ export default [
             id: "activity-details",
           }),
           route("account", "routes/account/account.tsx"),
-          route("wrapped", "routes/wrapped/wrapped.tsx"),
           route("external-links", "routes/external-links.tsx"),
           route(
             "announcements/create",
