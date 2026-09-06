@@ -14,7 +14,12 @@ import type { TokenParsed } from "~/types/TokenParsed";
 import { hasEnrollmentOpened } from "~/util/activity.util";
 import { downloadActivityEnrollmentsCsv } from "~/util/activityCsv.util";
 import { generateParticipantChecklistPdf } from "~/util/pdf.util";
-import { canEditActivity, isBoardOrCandidateBoard } from "~/util/group.util";
+import {
+  canEditActivity,
+  hasPermission,
+  isBoardOrCandidateBoard,
+  isInGroupWithId,
+} from "~/util/group.util";
 import type { Route } from "./+types/activity";
 import {
   getActivityBackPath,
@@ -85,6 +90,12 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
   }, [activity, tokenParsed]);
 
   const isBoard = isBoardOrCandidateBoard(tokenParsed);
+  const isOrganizer =
+    !!activity?.organizerId &&
+    tokenParsed !== null &&
+    (isInGroupWithId(tokenParsed, activity.organizerId) ||
+      hasPermission(tokenParsed, "EditActivityForGroup", activity.organizerId));
+  const canExport = isBoard || isOrganizer;
 
   if (loading || !tokenParsed) return t("loading");
   if (activity == null) return t("failed_fetching");
@@ -108,59 +119,61 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
               >
                 <Copy size={18} />
               </Button>
-              <Button
-                onClick={async () => {
-                  const confirmed = await confirm(
-                    activity.isArchived
-                      ? t("confirm_unarchive_activity")
-                      : t("confirm_archive_activity"),
-                    {
-                      title: activity.isArchived
-                        ? t("unarchive_activity")
-                        : t("archive_activity"),
-                      variant: "secondary",
-                    },
-                  );
-                  if (!confirmed) return;
-
-                  const nextArchived = !activity.isArchived;
-                  const res = await patchActivitiesById({
-                    path: { id: activity.id },
-                    body: [
+              {isBoard && (
+                <Button
+                  onClick={async () => {
+                    const confirmed = await confirm(
+                      activity.isArchived
+                        ? t("confirm_unarchive_activity")
+                        : t("confirm_archive_activity"),
                       {
-                        op: "replace",
-                        path: "/isarchived",
-                        value: nextArchived,
+                        title: activity.isArchived
+                          ? t("unarchive_activity")
+                          : t("archive_activity"),
+                        variant: "secondary",
                       },
-                    ],
-                  });
-                  if (res.error) {
-                    toast.error(t("failed_updating"));
-                    return;
+                    );
+                    if (!confirmed) return;
+
+                    const nextArchived = !activity.isArchived;
+                    const res = await patchActivitiesById({
+                      path: { id: activity.id },
+                      body: [
+                        {
+                          op: "replace",
+                          path: "/isarchived",
+                          value: nextArchived,
+                        },
+                      ],
+                    });
+                    if (res.error) {
+                      toast.error(t("failed_updating"));
+                      return;
+                    }
+                    setActivity((prev) =>
+                      prev ? { ...prev, isArchived: nextArchived } : prev,
+                    );
+                    toast.success(
+                      nextArchived
+                        ? t("activity_archived")
+                        : t("activity_unarchived"),
+                    );
+                  }}
+                  variant="secondary"
+                  className="flex items-center px-2"
+                  aria-label={
+                    activity.isArchived
+                      ? t("unarchive_activity")
+                      : t("archive_activity")
                   }
-                  setActivity((prev) =>
-                    prev ? { ...prev, isArchived: nextArchived } : prev,
-                  );
-                  toast.success(
-                    nextArchived
-                      ? t("activity_archived")
-                      : t("activity_unarchived"),
-                  );
-                }}
-                variant="secondary"
-                className="flex items-center px-2"
-                aria-label={
-                  activity.isArchived
-                    ? t("unarchive_activity")
-                    : t("archive_activity")
-                }
-              >
-                {activity.isArchived ? (
-                  <ArchiveRestore size={18} />
-                ) : (
-                  <Archive size={18} />
-                )}
-              </Button>
+                >
+                  {activity.isArchived ? (
+                    <ArchiveRestore size={18} />
+                  ) : (
+                    <Archive size={18} />
+                  )}
+                </Button>
+              )}
               {canEdit && (
                 <Button
                   onClick={() =>
@@ -205,7 +218,7 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
               }
               isAdmin={isBoard}
               onExportCsv={
-                canEdit || isBoard
+                canExport
                   ? () => {
                       downloadActivityEnrollmentsCsv(
                         activity,
@@ -218,7 +231,7 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
                   : undefined
               }
               onExportPdf={
-                canEdit || isBoard
+                canExport
                   ? () => {
                       generateParticipantChecklistPdf(
                         activity,

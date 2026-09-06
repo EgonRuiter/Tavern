@@ -34,7 +34,12 @@ import { generateParticipantChecklistPdf } from "~/util/pdf.util";
 import { hasAllMandatoryAnswers } from "~/util/answer.util";
 import { getEnv } from "~/util/config.utils";
 import { formatDate } from "~/util/date.util";
-import { canEditActivity, isBoardOrCandidateBoard } from "~/util/group.util";
+import {
+  canEditActivity,
+  hasPermission,
+  isBoardOrCandidateBoard,
+  isInGroupWithId,
+} from "~/util/group.util";
 import { isMemberInTargetAudience } from "~/util/targetaudience.util";
 import BorderedTile from "../../Tiles/BorderedTile";
 import Button from "../../UI/Button";
@@ -190,8 +195,24 @@ export default function ActivityDetailsTile({
   const waitingPosition = waitingIndex !== -1 ? waitingIndex + 1 : null;
   const aheadCount = waitingIndex !== -1 ? waitingIndex : null;
 
-  const canExport =
-    isBoard || (tokenParsed ? canEditActivity(activity, tokenParsed) : false);
+  const isOrganizer =
+    !!activity.organizerId &&
+    tokenParsed !== null &&
+    (isInGroupWithId(tokenParsed, activity.organizerId) ||
+      hasPermission(tokenParsed, "EditActivityForGroup", activity.organizerId));
+  const canExport = isBoard || isOrganizer;
+  const canClone =
+    isBoard ||
+    (tokenParsed
+      ? hasPermission(tokenParsed, "EditAllActivities") ||
+        (activity.organizerId
+          ? hasPermission(
+              tokenParsed,
+              "EditActivityForGroup",
+              activity.organizerId,
+            )
+          : false)
+      : false);
 
   useEffect(() => {
     setAnswers(toAnswerMap(currentEnrollment?.specificationAnswers));
@@ -529,74 +550,78 @@ export default function ActivityDetailsTile({
                   {t("export_pdf")}
                 </div>
               </Button>
-              <Button
-                variant="secondary"
-                className="w-full sm:w-auto"
-                onClick={() =>
-                  navigate(`/activities/create?cloneFrom=${activity.id}`)
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <Copy size={18} />
-                  {t("clone_activity")}
-                </div>
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full sm:w-auto"
-                onClick={async () => {
-                  const confirmed = await confirm(
-                    activity.isArchived
-                      ? t("confirm_unarchive_activity")
-                      : t("confirm_archive_activity"),
-                    {
-                      title: activity.isArchived
-                        ? t("unarchive_activity")
-                        : t("archive_activity"),
-                      variant: "secondary",
-                    },
-                  );
-                  if (!confirmed) return;
-
-                  const nextArchived = !activity.isArchived;
-                  const res = await patchActivitiesById({
-                    path: { id: activity.id },
-                    body: [
-                      {
-                        op: "replace",
-                        path: "/isarchived",
-                        value: nextArchived,
-                      },
-                    ],
-                  });
-                  if (res.error) {
-                    toast.error(t("failed_updating"));
-                    return;
-                  }
-                  if (setActivity) {
-                    setActivity((prev) =>
-                      prev ? { ...prev, isArchived: nextArchived } : prev,
-                    );
-                  }
-                  toast.success(
-                    nextArchived
-                      ? t("activity_archived")
-                      : t("activity_unarchived"),
-                  );
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  {activity.isArchived ? (
-                    <ArchiveRestore size={18} />
-                  ) : (
-                    <Archive size={18} />
-                  )}
-                  {activity.isArchived
-                    ? t("unarchive_activity")
-                    : t("archive_activity")}
-                </div>
-              </Button>
             </>
+          )}
+          {canClone && (
+            <Button
+              variant="secondary"
+              className="w-full sm:w-auto"
+              onClick={() =>
+                navigate(`/activities/create?cloneFrom=${activity.id}`)
+              }
+            >
+              <div className="flex items-center gap-2">
+                <Copy size={18} />
+                {t("clone_activity")}
+              </div>
+            </Button>
+          )}
+          {isBoard && (
+            <Button
+              variant="secondary"
+              className="w-full sm:w-auto"
+              onClick={async () => {
+                const confirmed = await confirm(
+                  activity.isArchived
+                    ? t("confirm_unarchive_activity")
+                    : t("confirm_archive_activity"),
+                  {
+                    title: activity.isArchived
+                      ? t("unarchive_activity")
+                      : t("archive_activity"),
+                    variant: "secondary",
+                  },
+                );
+                if (!confirmed) return;
+
+                const nextArchived = !activity.isArchived;
+                const res = await patchActivitiesById({
+                  path: { id: activity.id },
+                  body: [
+                    {
+                      op: "replace",
+                      path: "/isarchived",
+                      value: nextArchived,
+                    },
+                  ],
+                });
+                if (res.error) {
+                  toast.error(t("failed_updating"));
+                  return;
+                }
+                if (setActivity) {
+                  setActivity((prev) =>
+                    prev ? { ...prev, isArchived: nextArchived } : prev,
+                  );
+                }
+                toast.success(
+                  nextArchived
+                    ? t("activity_archived")
+                    : t("activity_unarchived"),
+                );
+              }}
+            >
+              <div className="flex items-center gap-2">
+                {activity.isArchived ? (
+                  <ArchiveRestore size={18} />
+                ) : (
+                  <Archive size={18} />
+                )}
+                {activity.isArchived
+                  ? t("unarchive_activity")
+                  : t("archive_activity")}
+              </div>
+            </Button>
           )}
         </div>
       </div>

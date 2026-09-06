@@ -1,8 +1,24 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ActivityResponseDto } from "~/api";
-import { renderWithProviders } from "~/testUtils";
+import { createMockAuthService, renderWithProviders } from "~/testUtils";
+import type { TokenParsed } from "~/types/TokenParsed";
 import { getCommitteeYear } from "~/util/date.util";
+
+const boardAuthService = createMockAuthService({
+  getTokenParsed: vi.fn(
+    async () =>
+      ({
+        locale: "en",
+        UserId: "00000000-0000-0000-0000-000000000000" as TokenParsed["UserId"],
+        access_level: "member",
+        given_name: "Board",
+        family_name: "Member",
+        name: "Board Member",
+        is_admin: true,
+      }) satisfies TokenParsed,
+  ),
+});
 
 const { loadAdminActivities, handleViewActivity, handleDeleteAdminActivity } =
   vi.hoisted(() => ({
@@ -337,7 +353,7 @@ describe("Activities (admin)", () => {
       },
     );
 
-    renderWithProviders(<Activities />);
+    renderWithProviders(<Activities />, { authService: boardAuthService });
 
     expect(await screen.findByText("Feest")).toBeInTheDocument();
     const deleteButtons = screen.getAllByRole("button", {
@@ -371,7 +387,7 @@ describe("Activities (admin)", () => {
       },
     );
 
-    renderWithProviders(<Activities />);
+    renderWithProviders(<Activities />, { authService: boardAuthService });
 
     expect(await screen.findByText("Feest")).toBeInTheDocument();
     expect(screen.getByText("Borrel")).toBeInTheDocument();
@@ -385,6 +401,27 @@ describe("Activities (admin)", () => {
       expect(screen.queryByText("Feest")).not.toBeInTheDocument();
     });
     expect(screen.getByText("Borrel")).toBeInTheDocument();
+  });
+
+  it("does not render delete or archive buttons for non-board users", async () => {
+    loadAdminActivities.mockImplementation(
+      async (_year, setLoading, setActivities) => {
+        setActivities([
+          makeActivity({ id: 1, name: "Feest" }),
+        ]);
+        setLoading(false);
+      },
+    );
+
+    renderWithProviders(<Activities />);
+
+    expect(await screen.findByText("Feest")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "delete_activity" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "archive_activity" }),
+    ).not.toBeInTheDocument();
   });
 
   it("separates published and unpublished activities into distinct sections with counts", async () => {

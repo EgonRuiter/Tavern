@@ -35,8 +35,7 @@ public class Activity
         "/isadultonly",
         "/isweeklydrinks",
         "/allowedaudience",
-        "/specificationquestionsjson",
-        "/isarchived"
+        "/specificationquestionsjson"
     };
 
     /// <summary>

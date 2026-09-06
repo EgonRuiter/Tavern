@@ -56,8 +56,9 @@ export default function Activities() {
     };
   }, [authService]);
 
+  const isBoard = isBoardOrCandidateBoard(tokenParsed);
   const canViewPastActivities =
-    isBoardOrCandidateBoard(tokenParsed) ||
+    isBoard ||
     hasPermission(tokenParsed, "ViewPastActivities");
 
   const [loading, setLoading] = useState(false);
@@ -222,79 +223,91 @@ export default function Activities() {
       className: "w-full sm:w-px whitespace-nowrap text-right",
       render: (act) => (
         <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="secondary"
-            className="px-2"
-            aria-label={t("clone_activity")}
-            title={t("clone_activity")}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/activities/create?cloneFrom=${act.id}`);
-            }}
-          >
-            <Copy size={16} />
-          </Button>
-          <Button
-            variant="secondary"
-            className="px-2"
-            aria-label={
-              act.isArchived
-                ? t("unarchive_activity")
-                : t("archive_activity")
-            }
-            title={
-              act.isArchived
-                ? t("unarchive_activity")
-                : t("archive_activity")
-            }
-            onClick={async (e) => {
-              e.stopPropagation();
-              const confirmed = await confirm(
+          {(isBoard ||
+            hasPermission(tokenParsed, "EditAllActivities") ||
+            (act.organizerId
+              ? hasPermission(
+                  tokenParsed,
+                  "EditActivityForGroup",
+                  act.organizerId,
+                )
+              : false)) && (
+            <Button
+              variant="secondary"
+              className="px-2"
+              aria-label={t("clone_activity")}
+              title={t("clone_activity")}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/activities/create?cloneFrom=${act.id}`);
+              }}
+            >
+              <Copy size={16} />
+            </Button>
+          )}
+          {isBoard && (
+            <Button
+              variant="secondary"
+              className="px-2"
+              aria-label={
                 act.isArchived
-                  ? t("confirm_unarchive_activity")
-                  : t("confirm_archive_activity"),
-                {
-                  title: act.isArchived
-                    ? t("unarchive_activity")
-                    : t("archive_activity"),
-                  variant: "secondary",
-                },
-              );
-              if (!confirmed) return;
-
-              const nextArchived = !act.isArchived;
-              const res = await patchActivitiesById({
-                path: { id: act.id },
-                body: [
-                  {
-                    op: "replace",
-                    path: "/isarchived",
-                    value: nextArchived,
-                  },
-                ],
-              });
-              if (res.error) {
-                toast.error(t("failed_updating"));
-                return;
+                  ? t("unarchive_activity")
+                  : t("archive_activity")
               }
-              setActivities((prev) =>
-                prev.map((a) =>
-                  a.id === act.id ? { ...a, isArchived: nextArchived } : a,
-                ),
-              );
-              toast.success(
-                nextArchived
-                  ? t("activity_archived")
-                  : t("activity_unarchived"),
-              );
-            }}
-          >
-            {act.isArchived ? (
-              <ArchiveRestore size={16} />
-            ) : (
-              <Archive size={16} />
-            )}
-          </Button>
+              title={
+                act.isArchived
+                  ? t("unarchive_activity")
+                  : t("archive_activity")
+              }
+              onClick={async (e) => {
+                e.stopPropagation();
+                const confirmed = await confirm(
+                  act.isArchived
+                    ? t("confirm_unarchive_activity")
+                    : t("confirm_archive_activity"),
+                  {
+                    title: act.isArchived
+                      ? t("unarchive_activity")
+                      : t("archive_activity"),
+                    variant: "secondary",
+                  },
+                );
+                if (!confirmed) return;
+
+                const nextArchived = !act.isArchived;
+                const res = await patchActivitiesById({
+                  path: { id: act.id },
+                  body: [
+                    {
+                      op: "replace",
+                      path: "/isarchived",
+                      value: nextArchived,
+                    },
+                  ],
+                });
+                if (res.error) {
+                  toast.error(t("failed_updating"));
+                  return;
+                }
+                setActivities((prev) =>
+                  prev.map((a) =>
+                    a.id === act.id ? { ...a, isArchived: nextArchived } : a,
+                  ),
+                );
+                toast.success(
+                  nextArchived
+                    ? t("activity_archived")
+                    : t("activity_unarchived"),
+                );
+              }}
+            >
+              {act.isArchived ? (
+                <ArchiveRestore size={16} />
+              ) : (
+                <Archive size={16} />
+              )}
+            </Button>
+          )}
           <Button
             variant="secondary"
             className="w-full sm:w-auto"
@@ -305,19 +318,21 @@ export default function Activities() {
           >
             {t("view_activity")}
           </Button>
-          <Button
-            variant="danger"
-            className="px-2"
-            aria-label={t("delete_activity")}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteAdminActivity(act.id, confirm, () => {
-                setActivities((prev) => prev.filter((a) => a.id !== act.id));
-              });
-            }}
-          >
-            <Trash2Icon size={16} />
-          </Button>
+          {isBoard && (
+            <Button
+              variant="danger"
+              className="px-2"
+              aria-label={t("delete_activity")}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteAdminActivity(act.id, confirm, () => {
+                  setActivities((prev) => prev.filter((a) => a.id !== act.id));
+                });
+              }}
+            >
+              <Trash2Icon size={16} />
+            </Button>
+          )}
         </div>
       ),
     },
