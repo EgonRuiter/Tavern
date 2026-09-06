@@ -8,6 +8,9 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true,
+    watch: {
+      usePolling: true,
+    },
   },
   ssr: {
     noExternal: ["@react-keycloak/web", "keycloak-js"],
