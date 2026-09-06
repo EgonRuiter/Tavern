@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import type { ActivityResponseDto } from "~/api";
 
 /**
  * Generates a PDF document in A3 format from an array of image URLs. Each image is added to a new page in the PDF,
@@ -50,6 +51,15 @@ export const generateA3Pdf = async (
   pdf.save("a3.pdf");
 };
 
+function getMemberFullName(
+  member?: { firstName?: string | null; lastName?: string | null } | null,
+  fallback = "",
+): string {
+  if (!member) return fallback;
+  const full = `${member.firstName || ""} ${member.lastName || ""}`.trim();
+  return full || fallback;
+}
+
 /**
  * Generates a printable participant checklist in A4 portrait format for bar/door duties.
  * Includes checkboxes, participant names, dietary answers, waiting list status, and notes.
@@ -58,7 +68,7 @@ export const generateA3Pdf = async (
  * @param {boolean} [isDutch=true] - Whether to format labels in Dutch or English.
  */
 export const generateParticipantChecklistPdf = (
-  activity: import("~/api").ActivityResponseDto,
+  activity: ActivityResponseDto,
   isDutch: boolean = true,
 ): void => {
   const pdf = new jsPDF({
@@ -212,10 +222,8 @@ export const generateParticipantChecklistPdf = (
     if (a.isOnWaitingList !== b.isOnWaitingList) {
       return a.isOnWaitingList ? 1 : -1;
     }
-    const nameA =
-      `${a.member?.firstName || ""} ${a.member?.lastName || ""}`.toLowerCase();
-    const nameB =
-      `${b.member?.firstName || ""} ${b.member?.lastName || ""}`.toLowerCase();
+    const nameA = getMemberFullName(a.member).toLowerCase();
+    const nameB = getMemberFullName(b.member).toLowerCase();
     return nameA.localeCompare(nameB);
   });
 
@@ -268,11 +276,10 @@ export const generateParticipantChecklistPdf = (
         drawPageHeader(false);
       }
 
-      const memberName = enrollment.member
-        ? `${enrollment.member.firstName || ""} ${enrollment.member.lastName || ""}`.trim()
-        : isDutch
-          ? "Onbekend"
-          : "Unknown";
+      const memberName = getMemberFullName(
+        enrollment.member,
+        isDutch ? "Onbekend" : "Unknown",
+      );
 
       const answersText =
         (enrollment.specificationAnswers || [])

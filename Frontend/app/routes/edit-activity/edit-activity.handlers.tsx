@@ -82,7 +82,7 @@ export const loadEditActivityData = async ({
         specificationQuestions: (source.specificationQuestions || []).map(
           (q) => ({
             ...q,
-            id: undefined as any,
+            id: undefined as unknown as number,
             options: q.options ? [...q.options] : [],
           }),
         ),
