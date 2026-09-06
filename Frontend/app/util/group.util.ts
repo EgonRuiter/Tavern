@@ -88,8 +88,8 @@ export const hasPermission = (
 
   return memberships.some(
     (g) =>
-      g.permissions.includes(permission) ||
-      (g.role?.permissions.includes(permission) ?? false),
+      Boolean(g.permissions?.includes(permission)) ||
+      Boolean(g.role?.permissions?.includes(permission)),
   );
 };
 
@@ -109,8 +109,8 @@ export const getGroupIdsWithPermission = (
     tokenParsed?.group_memberships
       ?.filter(
         (g) =>
-          g.permissions.includes(permission) ||
-          (g.role?.permissions.includes(permission) ?? false),
+          Boolean(g.permissions?.includes(permission)) ||
+          Boolean(g.role?.permissions?.includes(permission)),
       )
       .map((g) => g.id) ?? []
   );

@@ -205,4 +205,18 @@ describe("canEditActivity", () => {
       ),
     ).toBe(false);
   });
+
+  it("handles memberships with undefined permissions or role safely without throwing", () => {
+    const token = buildToken({
+      is_admin: false,
+      group_memberships: [
+        { id: 1, name: "GroupWithoutPerms" } as any,
+        { id: 2, name: "GroupWithNullRole", permissions: undefined, role: { id: 1, name: "Role" } } as any,
+      ],
+    });
+    expect(() => hasPermission(token, "ViewMembers")).not.toThrow();
+    expect(hasPermission(token, "ViewMembers")).toBe(false);
+    expect(() => getGroupIdsWithPermission(token, "EditActivityForGroup")).not.toThrow();
+    expect(getGroupIdsWithPermission(token, "EditActivityForGroup")).toEqual([]);
+  });
 });
