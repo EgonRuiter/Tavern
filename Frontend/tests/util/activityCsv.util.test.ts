@@ -23,6 +23,13 @@ describe("activityCsv.util", () => {
       expect(escapeCsvField('He said "Hi"')).toBe('"He said ""Hi"""');
       expect(escapeCsvField("Multi\nLine")).toBe('"Multi\nLine"');
     });
+
+    it("neutralizes potential formula injection characters", () => {
+      expect(escapeCsvField("=SUM(1+1)")).toBe("'=SUM(1+1)");
+      expect(escapeCsvField("+cmd")).toBe("'+cmd");
+      expect(escapeCsvField("-10")).toBe("'-10");
+      expect(escapeCsvField("@eval")).toBe("'@eval");
+    });
   });
 
   describe("generateActivityEnrollmentsCsv", () => {
