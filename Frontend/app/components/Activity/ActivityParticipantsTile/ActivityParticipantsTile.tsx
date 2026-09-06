@@ -37,9 +37,9 @@ export default function ActivityParticipantsTile({
 
   return (
     <Tile className="w-full">
-      <h2 className="text-2xl font-extrabold text-slate-900 mb-8 flex items-center gap-3">
+      <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
         {title || t("participants")}
-        <span className="bg-slate-100 text-slate-500 text-sm py-1 px-3 rounded-full font-bold">
+        <span className="bg-gray-100 text-gray-500 text-sm py-1 px-3 rounded-full font-bold">
           {count}
         </span>
       </h2>

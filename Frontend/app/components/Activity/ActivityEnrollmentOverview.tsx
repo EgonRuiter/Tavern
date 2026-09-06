@@ -82,8 +82,8 @@ export default function ActivityEnrollmentOverview({
           className={cn(
             "flex-1 py-1 px-2 text-xs font-semibold rounded-lg transition-all text-center cursor-pointer",
             activeTab === "upcoming"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-600 hover:text-slate-900",
+              ? "bg-white text-gray-900 shadow-xs"
+              : "text-gray-600 hover:text-gray-900",
           )}
         >
           {t("upcoming")} ({upcomingActivities.length})
@@ -94,8 +94,8 @@ export default function ActivityEnrollmentOverview({
           className={cn(
             "flex-1 py-1 px-2 text-xs font-semibold rounded-lg transition-all text-center cursor-pointer",
             activeTab === "past"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-600 hover:text-slate-900",
+              ? "bg-white text-gray-900 shadow-xs"
+              : "text-gray-600 hover:text-gray-900",
           )}
         >
           {t("past")} ({pastActivities.length})
@@ -116,7 +116,7 @@ export default function ActivityEnrollmentOverview({
             <Tile key={activity.id} className="p-0">
               <Link
                 key={activity.id}
-                className="!text-black mt-0 flex p-2 gap-2 hover:bg-gray-50 mt-0"
+                className="!text-black flex p-2 gap-2 hover:bg-gray-50 rounded-lg transition-colors"
                 to={`/activities/${activity.id}`}
               >
                 {/* Icon Container */}

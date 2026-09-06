@@ -1,6 +1,7 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { type Theme, useTheme } from "~/context/ThemeContext";
+import Button from "./Button";
 
 interface ThemeToggleProps {
   variant?: "segmented" | "dropdown" | "icon";
@@ -20,7 +21,7 @@ export default function ThemeToggle({
       <button
         type="button"
         onClick={toggleTheme}
-        className={`p-2 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer ${className}`}
+        className={`p-2 rounded-lg transition-colors hover:bg-gray-100 text-gray-700 cursor-pointer ${className}`}
         aria-label={t("toggle_theme")}
         title={t("toggle_theme")}
       >
@@ -32,18 +33,18 @@ export default function ThemeToggle({
   if (variant === "dropdown") {
     return (
       <div className={`flex items-center justify-between p-2 text-xs ${className}`}>
-        <span className="text-gray-500 dark:text-slate-400 font-medium">
+        <span className="text-gray-500 font-medium">
           {t("theme")}
         </span>
-        <div className="flex bg-gray-100 dark:bg-slate-800 rounded-lg p-0.5 border border-gray-200 dark:border-slate-700">
+        <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
           <button
             type="button"
             onClick={() => setTheme("light")}
             title={t("theme_light")}
             className={`p-1.5 rounded-md transition-colors ${
               theme === "light"
-                ? "bg-white dark:bg-slate-700 text-(--board-primary) shadow-xs"
-                : "text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100"
+                ? "bg-white text-(--board-primary) shadow-xs"
+                : "text-gray-500 hover:text-gray-900"
             }`}
           >
             <Sun size={14} />
@@ -54,8 +55,8 @@ export default function ThemeToggle({
             title={t("theme_dark")}
             className={`p-1.5 rounded-md transition-colors ${
               theme === "dark"
-                ? "bg-white dark:bg-slate-700 text-(--board-primary) shadow-xs"
-                : "text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100"
+                ? "bg-white text-(--board-primary) shadow-xs"
+                : "text-gray-500 hover:text-gray-900"
             }`}
           >
             <Moon size={14} />
@@ -66,8 +67,8 @@ export default function ThemeToggle({
             title={t("theme_system")}
             className={`p-1.5 rounded-md transition-colors ${
               theme === "system"
-                ? "bg-white dark:bg-slate-700 text-(--board-primary) shadow-xs"
-                : "text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100"
+                ? "bg-white text-(--board-primary) shadow-xs"
+                : "text-gray-500 hover:text-gray-900"
             }`}
           >
             <Monitor size={14} />
@@ -89,22 +90,16 @@ export default function ThemeToggle({
       {options.map(({ value, label, icon: Icon }) => {
         const isSelected = theme === value;
         return (
-          <button
+          <Button
             key={value}
             type="button"
+            variant={isSelected ? "primary" : "secondary"}
+            className="flex-1 flex items-center justify-center gap-2"
             onClick={() => setTheme(value)}
-            className={`
-              flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors cursor-pointer
-              ${
-                isSelected
-                  ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
-                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700"
-              }
-            `}
           >
             <Icon size={16} />
             <span>{label}</span>
-          </button>
+          </Button>
         );
       })}
     </div>

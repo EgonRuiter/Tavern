@@ -76,7 +76,7 @@ export default function ParticipantTile({
   const tileContent = (
     <Tile
       className={cn(
-        "bg-slate-50 flex items-center gap-4 border transition-all",
+        "bg-gray-50 flex items-center gap-4 border transition-all",
         isClickable ? "cursor-pointer" : "cursor-default",
         isHonoraryOrMerit
           ? cn(
@@ -85,7 +85,7 @@ export default function ParticipantTile({
             )
           : cn(
               "border-transparent",
-              isClickable && "group-hover:border-slate-200 group-hover:bg-white",
+              isClickable && "group-hover:border-gray-200 group-hover:bg-white",
             ),
       )}
     >
@@ -117,7 +117,7 @@ export default function ParticipantTile({
         <div className="flex items-center gap-1.5 min-w-0">
           <p
             className={cn(
-              "font-bold text-slate-900 truncate leading-tight",
+              "font-bold text-gray-900 truncate leading-tight",
               isClickable &&
                 "group-hover:text-(--board-primary-dark) transition-colors",
             )}
@@ -146,7 +146,7 @@ export default function ParticipantTile({
           <div className="relative h-4 overflow-hidden mt-0.5">
             <p
               key={currentAnswerIndex}
-              className="text-xs text-slate-500 truncate animate-slide-up"
+              className="text-xs text-gray-500 truncate animate-slide-up"
             >
               {answers[currentAnswerIndex].answer}
             </p>

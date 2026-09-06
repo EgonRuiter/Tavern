@@ -72,7 +72,7 @@ export function BoardDropdown({ activities, token }: BoardDropdownProps) {
       </Button>
 
       {isOpen && (
-        <ul className="flex flex-col gap-2 right-0 top-11 absolute w-max bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 shadow-lg z-50 animate-in fade-in zoom-in-95 duration-150">
+        <ul className="flex flex-col gap-2 right-0 top-11 absolute w-max bg-white border border-gray-200 rounded-lg p-2 shadow-lg z-50 animate-in fade-in zoom-in-95 duration-150">
           <Button
             variant="secondary"
             onClick={() => {
@@ -236,8 +236,8 @@ export default function ActivitiesPage() {
           className={cn(
             "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
             filter === "all"
-              ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-              : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50",
+              ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
+              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
           )}
         >
           {t("all_activities")}
@@ -248,8 +248,8 @@ export default function ActivitiesPage() {
           className={cn(
             "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
             filter === "enrolled"
-              ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-              : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50",
+              ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
+              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
           )}
         >
           {t("my_enrollments")}
@@ -260,8 +260,8 @@ export default function ActivitiesPage() {
           className={cn(
             "px-3.5 py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer whitespace-nowrap",
             filter === "history"
-              ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-              : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50",
+              ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
+              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
           )}
         >
           {t("enrolled_history")}

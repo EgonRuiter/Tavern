@@ -128,19 +128,19 @@ export default function StickyWrappedPage() {
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-6 py-4 animate-in fade-in duration-300">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-200 pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-(--board-primary) to-(--board-primary-light) text-white shadow-md">
             <Sparkles size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
               {t("sticky_wrapped")}
               <span className="text-sm px-2 py-0.5 rounded-full bg-(--board-primary-light)/20 text-(--board-primary) font-bold">
                 {yearLabel}
               </span>
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-gray-500">
               {t("sticky_wrapped_subtitle")}
             </p>
           </div>
@@ -156,7 +156,7 @@ export default function StickyWrappedPage() {
                 setSelectedYear(val === "all" ? "all" : Number(val));
                 setCurrentSlide(0);
               }}
-              className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 font-medium cursor-pointer"
+              className="text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 font-medium cursor-pointer"
             >
               <option value="all">{t("all_time")}</option>
               {stats.availableYears.map((yr) => (
@@ -167,14 +167,14 @@ export default function StickyWrappedPage() {
             </select>
           )}
 
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+          <div className="flex bg-gray-100 p-0.5 rounded-lg border border-gray-200">
             <button
               type="button"
               onClick={() => setViewMode("story")}
-              className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${
+              className={`px-3 py-1 text-xs rounded-md font-medium transition-colors cursor-pointer ${
                 viewMode === "story"
-                  ? "bg-white dark:bg-slate-700 text-(--board-primary) shadow-xs"
-                  : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+                  ? "bg-white text-(--board-primary) shadow-xs"
+                  : "text-gray-500 hover:text-gray-900"
               }`}
             >
               {t("story_mode")}
@@ -182,10 +182,10 @@ export default function StickyWrappedPage() {
             <button
               type="button"
               onClick={() => setViewMode("summary")}
-              className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${
+              className={`px-3 py-1 text-xs rounded-md font-medium transition-colors cursor-pointer ${
                 viewMode === "summary"
-                  ? "bg-white dark:bg-slate-700 text-(--board-primary) shadow-xs"
-                  : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+                  ? "bg-white text-(--board-primary) shadow-xs"
+                  : "text-gray-500 hover:text-gray-900"
               }`}
             >
               {t("summary")}
@@ -195,13 +195,13 @@ export default function StickyWrappedPage() {
       </div>
 
       {stats.totalActivities === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 text-center bg-slate-50 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 gap-4">
-          <PartyPopper size={40} className="text-slate-400" />
+        <div className="flex flex-col items-center justify-center p-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200 gap-4">
+          <PartyPopper size={40} className="text-gray-400" />
           <div>
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
+            <h2 className="text-lg font-bold text-gray-800">
               {t("wrapped_no_data")}
             </h2>
-            <p className="text-sm text-slate-500 max-w-sm mt-1">
+            <p className="text-sm text-gray-500 max-w-sm mt-1">
               {t("wrapped_no_data_subtitle")}
             </p>
           </div>
@@ -478,7 +478,7 @@ export default function StickyWrappedPage() {
               <span className="text-4xl font-extrabold text-emerald-500">
                 {stats.freeActivitiesCount}
               </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-gray-400">
                 / {stats.totalActivities} {t("activities").toLowerCase()}
               </span>
             </div>
@@ -495,13 +495,13 @@ export default function StickyWrappedPage() {
                 {stats.topLocations.map((loc, i) => (
                   <div
                     key={loc.location}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100"
                   >
-                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-800 flex items-center gap-2">
                       <span className="font-bold text-amber-500">#{i + 1}</span>
                       {loc.location}
                     </span>
-                    <span className="text-xs font-semibold text-slate-500">
+                    <span className="text-xs font-semibold text-gray-500">
                       {loc.count} {t("times")}
                     </span>
                   </div>
@@ -520,7 +520,7 @@ export default function StickyWrappedPage() {
               ).toLocaleDateString()}
             >
               <div className="flex flex-col gap-1">
-                <span className="font-bold text-slate-900 dark:text-white truncate">
+                <span className="font-bold text-gray-900 truncate">
                   {stats.firstActivity.name}
                 </span>
                 <NavLink
@@ -545,12 +545,12 @@ export default function StickyWrappedPage() {
                   {stats.highlightAnswers.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700"
+                      className="p-3 rounded-xl bg-gray-50 border border-gray-100"
                     >
-                      <p className="text-xs text-slate-400 uppercase tracking-wide font-medium truncate">
+                      <p className="text-xs text-gray-400 uppercase tracking-wide font-medium truncate">
                         {item.question}
                       </p>
-                      <p className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1 truncate">
+                      <p className="text-sm font-bold text-gray-800 mt-1 truncate">
                         {item.answer}
                       </p>
                     </div>

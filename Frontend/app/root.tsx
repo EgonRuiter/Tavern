@@ -85,25 +85,8 @@ const getDocumentLanguage = () =>
 export function Layout({ children }: { children: React.ReactNode }) {
   const currentLang = getDocumentLanguage();
   return (
-    <html lang={currentLang} suppressHydrationWarning>
+    <html lang={currentLang}>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var t = localStorage.getItem('tavern_theme') || 'system';
-                  var d = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                  if (d) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch(e) {}
-              })();
-            `,
-          }}
-        />
         <script src="/env-config.js" />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

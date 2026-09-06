@@ -173,7 +173,7 @@ export default function ChangeProfilePicture({
       )}
 
       <div className="mt-4 flex flex-col items-center gap-1.5 w-full">
-        <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
           {t("profile_frame")}
         </span>
         <div
@@ -188,8 +188,8 @@ export default function ChangeProfilePicture({
             className={cn(
               "px-2.5 py-1 text-xs font-medium rounded-full border transition-all cursor-pointer",
               selectedFrame === "default"
-                ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50",
+                ? "bg-(--board-primary) text-white border-(--board-primary) shadow-xs"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
             )}
           >
             {t("frame_default")}
@@ -201,8 +201,8 @@ export default function ChangeProfilePicture({
             className={cn(
               "px-2.5 py-1 text-xs font-medium rounded-full border transition-all cursor-pointer",
               selectedFrame === "primary"
-                ? "bg-(--board-primary-dark) text-white border-(--board-primary-dark) shadow-sm"
-                : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50",
+                ? "bg-(--board-primary-dark) text-white border-(--board-primary-dark) shadow-xs"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50",
             )}
           >
             {t("frame_primary")}

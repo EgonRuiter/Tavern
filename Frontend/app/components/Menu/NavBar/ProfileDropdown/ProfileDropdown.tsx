@@ -5,7 +5,6 @@ import {
   handleOptionClick,
   toggleDropdown,
 } from "./ProfileDropdown.handlers";
-import ThemeToggle from "~/components/UI/ThemeToggle";
 
 /**
  * Context values required to control the dropdown's layout behavior.
@@ -147,7 +146,7 @@ export default function ProfileDropdown({
             ${
               compact
                 ? "w-full"
-                : "absolute right-0 mt-3 min-w-44 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-100 dark:border-slate-700"
+                : "absolute right-0 mt-3 min-w-44 bg-white rounded-lg shadow-lg border border-gray-100"
             }
           `}
         >
@@ -174,16 +173,13 @@ export default function ProfileDropdown({
                 ${
                   compact
                     ? "text-white rounded-lg hover:bg-(--board-primary-light)"
-                    : "text-gray-800 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700"
+                    : "text-gray-800 hover:bg-gray-100"
                 }
               `}
             >
               {option.label}
             </NavLink>
           ))}
-          <div className="border-t border-gray-100 dark:border-slate-700">
-            <ThemeToggle variant="dropdown" />
-          </div>
         </div>
       )}
     </div>

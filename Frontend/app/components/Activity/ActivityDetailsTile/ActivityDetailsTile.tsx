@@ -197,7 +197,7 @@ export default function ActivityDetailsTile({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       {/* Poster Column */}
       <div className="lg:col-span-5 lg:sticky lg:top-8">
-        <div className="relative w-full aspect-[1/1.414] bg-slate-100 rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
+        <div className="relative w-full aspect-[1/1.414] bg-gray-100 rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           {/* Loading */}
           {posterStatus === "loading" && hasPoster && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
@@ -208,9 +208,9 @@ export default function ActivityDetailsTile({
 
           {/* No poster */}
           {!hasPoster && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-200">
-              <ImageIcon className="text-slate-400 mb-2" size={48} />
-              <span className="text-slate-400 text-sm font-medium">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200">
+              <ImageIcon className="text-gray-400 mb-2" size={48} />
+              <span className="text-gray-400 text-sm font-medium">
                 {t("no_poster")}
               </span>
             </div>
@@ -218,9 +218,9 @@ export default function ActivityDetailsTile({
 
           {/* Error fallback */}
           {posterStatus === "error" && hasPoster && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-200">
-              <ImageIcon className="text-slate-400 mb-2" size={48} />
-              <span className="text-slate-400 text-sm font-medium">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-200">
+              <ImageIcon className="text-gray-400 mb-2" size={48} />
+              <span className="text-gray-400 text-sm font-medium">
                 {t("no_poster")}
               </span>
             </div>
@@ -246,7 +246,7 @@ export default function ActivityDetailsTile({
       {/* Details Column */}
       <div className="lg:col-span-7 flex flex-col gap-6">
         <section className="space-y-1">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
             {activity.name}
           </h1>
           <p className="text-lg font-semibold text-(--board-primary)">
@@ -258,7 +258,7 @@ export default function ActivityDetailsTile({
 
         <BorderedTile>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-            <h3 className="font-bold text-slate-900">{t("description")}</h3>
+            <h3 className="font-bold text-gray-900">{t("description")}</h3>
 
             {isBoard && (
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -366,7 +366,7 @@ export default function ActivityDetailsTile({
         )}
 
         {/* Actions */}
-        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100">
+        <div className="flex flex-col gap-3 pt-4 border-t border-gray-200">
           {isEnrolled
             ? canUnenroll && (
                 <div className="flex flex-col gap-3">
