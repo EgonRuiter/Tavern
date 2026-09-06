@@ -10,6 +10,7 @@ import { useConfirm } from "~/components/UI/ConfirmModal/useConfirm";
 import { PageHeader } from "~/components/UI/PageHeader";
 import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
+import { hasEnrollmentOpened } from "~/util/activity.util";
 import { canEditActivity, isBoardOrCandidateBoard } from "~/util/group.util";
 import type { Route } from "./+types/activity";
 import {
@@ -130,7 +131,7 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
 
       <div className="space-y-6 w-full">
         <ActivityDetailsTile activity={activity} setActivity={setActivity} />
-        {(activity.areParticipantsVisible || isBoard) && (
+        {hasEnrollmentOpened(activity) && (activity.areParticipantsVisible || isBoard) && (
           <>
             <ActivityParticipantsTile
               enrollments={
