@@ -6,7 +6,7 @@ import {
   addQuestion,
   handleActivityFormChange,
   handleActivitySubmit,
-  handleDeleteActivityFromForm,
+  handleDeleteActivity,
   loadGroups,
   removeQuestion,
 } from "~/components/Activity/Edit/EditActivityForm/EditActivityForm.handlers";
@@ -26,7 +26,7 @@ vi.mock(
     removeQuestion: vi.fn(),
     updateQuestion: vi.fn(),
     handleActivitySubmit: vi.fn((args: any) => args.e.preventDefault()),
-    handleDeleteActivityFromForm: vi.fn(),
+    handleDeleteActivity: vi.fn(),
   }),
 );
 
@@ -223,50 +223,57 @@ describe("EditActivityForm", () => {
     expect(screen.getByText("save")).toBeInTheDocument();
   });
 
-  it("does not show delete button when creating an activity", () => {
+  it("does not show a delete button for a non-board user", () => {
     renderWithProviders(
-      <EditActivityForm
-        activity={null}
-        id={undefined}
-        canEditStructural={false}
-        canManageFinances={false}
-        isBoard={true}
-      />,
+      <EditActivityForm activity={buildActivity()} id="1" isBoard={false} />,
     );
-    expect(screen.queryByText("delete_activity")).not.toBeInTheDocument();
+    expect(screen.queryByText("delete")).not.toBeInTheDocument();
   });
 
-  it("does not show delete button when editing as a non-board user", () => {
+  it("does not show a delete button when creating a new activity", () => {
     renderWithProviders(
-      <EditActivityForm
-        activity={buildActivity()}
-        id="1"
-        canEditStructural={false}
-        canManageFinances={false}
-        isBoard={false}
-      />,
+      <EditActivityForm activity={null} id={undefined} isBoard={true} />,
     );
-    expect(screen.queryByText("delete_activity")).not.toBeInTheDocument();
+    expect(screen.queryByText("delete")).not.toBeInTheDocument();
   });
 
-  it("shows delete button and calls handleDeleteActivityFromForm when editing as board", () => {
+  it("shows a delete button for a board member editing an activity, and deletes on confirm", async () => {
     renderWithProviders(
-      <EditActivityForm
-        activity={buildActivity()}
-        id="1"
-        canEditStructural={false}
-        canManageFinances={false}
-        isBoard={true}
-      />,
+      <EditActivityForm activity={buildActivity()} id="1" isBoard={true} />,
     );
-    const deleteButton = screen.getByText("delete_activity");
-    expect(deleteButton).toBeInTheDocument();
-    fireEvent.click(deleteButton);
-    expect(handleDeleteActivityFromForm).toHaveBeenCalledWith(
-      expect.objectContaining({
-        activityId: 1,
-      }),
+
+    fireEvent.click(screen.getByText("delete"));
+
+    const confirmButtons = await screen.findAllByRole("button", {
+      name: "delete",
+    });
+    expect(confirmButtons.length).toBeGreaterThan(1);
+    fireEvent.click(confirmButtons[confirmButtons.length - 1]);
+
+    await waitFor(() =>
+      expect(handleDeleteActivity).toHaveBeenCalledWith(
+        1,
+        expect.any(Function),
+      ),
     );
+  });
+
+  it("closes the delete modal on cancel without deleting", async () => {
+    renderWithProviders(
+      <EditActivityForm activity={buildActivity()} id="1" isBoard={true} />,
+    );
+
+    fireEvent.click(screen.getByText("delete"));
+
+    const cancelButton = await screen.findByRole("button", { name: "cancel" });
+    fireEvent.click(cancelButton);
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("are_you_sure_delete_activity"),
+      ).not.toBeInTheDocument(),
+    );
+    expect(handleDeleteActivity).not.toHaveBeenCalled();
   });
 });
 

@@ -8,7 +8,7 @@ import {
   addQuestion,
   handleActivityFormChange,
   handleActivitySubmit,
-  handleDeleteActivityFromForm,
+  handleDeleteActivity,
   loadGroups,
   removeQuestion,
   updateQuestion,
@@ -18,22 +18,22 @@ const {
   postActivities,
   patchActivitiesById,
   postActivitiesByIdPoster,
-  getGroups,
   deleteActivitiesById,
+  getGroups,
 } = vi.hoisted(() => ({
   postActivities: vi.fn(),
   patchActivitiesById: vi.fn(),
   postActivitiesByIdPoster: vi.fn(),
-  getGroups: vi.fn(),
   deleteActivitiesById: vi.fn(),
+  getGroups: vi.fn(),
 }));
 
 vi.mock("~/api", () => ({
   postActivities,
   patchActivitiesById,
   postActivitiesByIdPoster,
-  getGroups,
   deleteActivitiesById,
+  getGroups,
 }));
 
 const toastErrorFn = vi.fn();
@@ -537,87 +537,27 @@ describe("handleActivitySubmit", () => {
   });
 });
 
-describe("handleDeleteActivityFromForm", () => {
-  it("does nothing when confirmation is rejected", async () => {
-    const confirm = vi.fn().mockResolvedValue(false);
-    const navigate = vi.fn();
-    const setSaving = vi.fn();
-
-    await handleDeleteActivityFromForm({
-      activityId: 10,
-      navigate,
-      pathname: "/activities/edit/10",
-      confirm,
-      setSaving,
-    });
-
-    expect(confirm).toHaveBeenCalled();
-    expect(deleteActivitiesById).not.toHaveBeenCalled();
-    expect(navigate).not.toHaveBeenCalled();
-    expect(setSaving).not.toHaveBeenCalled();
+describe("handleDeleteActivity", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it("deletes the activity and navigates to /activities on confirmation", async () => {
-    const confirm = vi.fn().mockResolvedValue(true);
-    const navigate = vi.fn();
-    const setSaving = vi.fn();
-    deleteActivitiesById.mockResolvedValue({ error: null });
+  it("calls onSuccess after a successful delete", async () => {
+    deleteActivitiesById.mockResolvedValue({});
+    const onSuccess = vi.fn();
 
-    await handleDeleteActivityFromForm({
-      activityId: 10,
-      navigate,
-      pathname: "/activities/edit/10",
-      confirm,
-      setSaving,
-    });
+    await handleDeleteActivity(5, onSuccess);
 
-    expect(confirm).toHaveBeenCalled();
-    await vi.waitFor(() =>
-      expect(deleteActivitiesById).toHaveBeenCalledWith({ path: { id: 10 } }),
-    );
-    expect(setSaving).toHaveBeenCalledWith(true);
-    expect(setSaving).toHaveBeenCalledWith(false);
-    expect(navigate).toHaveBeenCalledWith("/activities");
+    expect(deleteActivitiesById).toHaveBeenCalledWith({ path: { id: 5 } });
+    await vi.waitFor(() => expect(onSuccess).toHaveBeenCalled());
   });
 
-  it("navigates to /admin/activities when pathname starts with /admin", async () => {
-    const confirm = vi.fn().mockResolvedValue(true);
-    const navigate = vi.fn();
-    const setSaving = vi.fn();
-    deleteActivitiesById.mockResolvedValue({ error: null });
+  it("does not call onSuccess when delete fails", async () => {
+    deleteActivitiesById.mockResolvedValue({ error: true, message: "bad" });
+    const onSuccess = vi.fn();
 
-    await handleDeleteActivityFromForm({
-      activityId: 10,
-      navigate,
-      pathname: "/admin/activities/edit/10",
-      confirm,
-      setSaving,
-    });
+    await handleDeleteActivity(5, onSuccess);
 
-    await vi.waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith("/admin/activities"),
-    );
-  });
-
-  it("handles error when deletion API fails", async () => {
-    const confirm = vi.fn().mockResolvedValue(true);
-    const navigate = vi.fn();
-    const setSaving = vi.fn();
-    deleteActivitiesById.mockResolvedValue({ error: "deletion forbidden" });
-
-    await handleDeleteActivityFromForm({
-      activityId: 10,
-      navigate,
-      pathname: "/activities/edit/10",
-      confirm,
-      setSaving,
-    });
-
-    await vi.waitFor(() =>
-      expect(deleteActivitiesById).toHaveBeenCalledWith({ path: { id: 10 } }),
-    );
-    expect(setSaving).toHaveBeenCalledWith(false);
-    expect(navigate).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
   });
 });
-

@@ -247,7 +247,18 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
             <ActivityParticipantsTile
               title={t("waiting_list")}
               enrollments={
-                activity.enrollments.filter((e) => e.isOnWaitingList) ?? []
+                !activity.areParticipantsVisible
+                  ? []
+                  : (
+                      activity.enrollments.filter((e) => e.isOnWaitingList) ??
+                      []
+                    )
+                      .slice()
+                      .sort(
+                        (a, b) =>
+                          new Date(a.registeredOn).getTime() -
+                          new Date(b.registeredOn).getTime(),
+                      )
               }
               isAdmin={isBoard}
             />

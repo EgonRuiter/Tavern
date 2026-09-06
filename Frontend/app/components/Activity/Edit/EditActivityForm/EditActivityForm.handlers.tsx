@@ -3,9 +3,9 @@ import type React from "react";
 import toast from "react-hot-toast";
 import type { NavigateFunction } from "react-router";
 import {
+  deleteActivitiesById,
   type GetSpecificationQuestionResponseDto,
   type GroupResponseDto,
-  deleteActivitiesById,
   getGroups,
   patchActivitiesById,
   postActivities,
@@ -469,81 +469,41 @@ export const handleActivitySubmit = async ({
     }
   };
 
-    toast.promise(submitProcess(), {
-      loading: isEdit ? t("saving") : t("creating"),
-      success: isEdit ? t("activity_updated") : t("activity_created"),
-      error: (error) =>
-        appendErrorMessage(
-          isEdit ? t("activity_update_failed") : t("activity_creation_failed"),
-          error,
-        ),
-    });
-  };
+  toast.promise(submitProcess(), {
+    loading: isEdit ? t("saving") : t("creating"),
+    success: isEdit ? t("activity_updated") : t("activity_created"),
+    error: (error) =>
+      appendErrorMessage(
+        isEdit ? t("activity_update_failed") : t("activity_creation_failed"),
+        error,
+      ),
+  });
+};
 
-  /**
-   * Arguments for the handleDeleteActivityFromForm handler.
-   */
-  type DeleteActivityFromFormArgs = {
-    activityId: number;
-    navigate: NavigateFunction;
-    pathname: string;
-    confirm: (
-      message: string,
-      options?: {
-        title?: string;
-        confirmLabel?: string;
-        cancelLabel?: string;
-        variant?: "primary" | "secondary" | "danger";
-      },
-    ) => Promise<boolean>;
-    setSaving: (saving: boolean) => void;
-  };
+/**
+ * Deletes an activity, then navigates away on success.
+ *
+ * @async
+ * @param {number} activityId - The ID of the activity to delete.
+ * @param {() => void} onSuccess - Callback invoked once the activity has been deleted.
+ */
+export const handleDeleteActivity = async (
+  activityId: number,
+  onSuccess: () => void,
+) => {
+  const deleteProcess = async () => {
+    const response = await deleteActivitiesById({ path: { id: activityId } });
 
-  /**
-   * Deletes an activity from the edit form after user confirmation and navigates to the activity list.
-   *
-   * @async
-   * @param {DeleteActivityFromFormArgs} args - Arguments containing ID, navigation, confirmation function, and state setter.
-   */
-  export const handleDeleteActivityFromForm = async ({
-    activityId,
-    navigate,
-    pathname,
-    confirm,
-    setSaving,
-  }: DeleteActivityFromFormArgs) => {
-    if (
-      !(await confirm(t("delete_activity_confirmation"), {
-        title: t("delete_activity"),
-        variant: "danger",
-      }))
-    ) {
-      return;
+    if (response.error) {
+      throw response.error ?? new Error("Failed to delete activity");
     }
 
-    const deleteProcess = async () => {
-      setSaving(true);
-      try {
-        const response = await deleteActivitiesById({
-          path: { id: activityId },
-        });
-
-        if (response.error) {
-          throw response.error ?? new Error("Failed to delete activity");
-        }
-
-        const isFromAdmin = pathname.startsWith("/admin");
-        navigate(isFromAdmin ? "/admin/activities" : "/activities");
-      } finally {
-        setSaving(false);
-      }
-    };
-
-    toast.promise(deleteProcess(), {
-      loading: t("deleting"),
-      success: t("activity_deleted_successfully"),
-      error: (error) =>
-        appendErrorMessage(t("failed_to_delete_activity"), error),
-    });
+    onSuccess();
   };
 
+  toast.promise(deleteProcess(), {
+    loading: t("deleting"),
+    success: t("delete_success"),
+    error: (error) => appendErrorMessage(t("delete_error"), error),
+  });
+};

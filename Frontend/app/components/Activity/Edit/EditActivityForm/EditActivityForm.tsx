@@ -1,4 +1,5 @@
 import { t } from "i18next";
+import { Trash2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import type {
@@ -26,7 +27,7 @@ import {
   formatForInput,
   handleActivityFormChange,
   handleActivitySubmit,
-  handleDeleteActivityFromForm,
+  handleDeleteActivity,
   loadGroups,
   removeQuestion,
   updateQuestion,
@@ -404,7 +405,7 @@ export default function EditActivityForm({
             )}
           </FormSection>
 
-          <div className="flex flex-col sm:flex-row gap-2 w-full">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
               type="submit"
               disabled={saving || !formValid}
@@ -412,28 +413,36 @@ export default function EditActivityForm({
             >
               {saving ? t("saving") : isEdit ? t("save") : t("create_activity")}
             </Button>
-            {isEdit && isBoard && (
+
+            {isBoard && isEdit && activity && (
               <Button
                 type="button"
                 variant="danger"
-                disabled={saving}
-                onClick={() =>
-                  handleDeleteActivityFromForm({
-                    activityId: Number(id),
-                    navigate,
-                    pathname,
-                    confirm,
-                    setSaving,
-                  })
-                }
-                className="w-full sm:w-auto whitespace-nowrap"
+                className="w-full sm:w-auto flex items-center justify-center gap-2"
+                onClick={async () => {
+                  if (
+                    !(await confirm(t("are_you_sure_delete_activity"), {
+                      title: t("delete"),
+                      confirmLabel: t("delete"),
+                    }))
+                  ) {
+                    return;
+                  }
+                  handleDeleteActivity(activity.id, () =>
+                    navigate(
+                      `${pathname.startsWith("/admin") ? "/admin" : ""}/activities`,
+                    ),
+                  );
+                }}
               >
-                {t("delete_activity")}
+                <Trash2Icon size={18} />
+                {t("delete")}
               </Button>
             )}
           </div>
         </Form>
       </BorderedTile>
+
       {confirmModal}
     </div>
   );
