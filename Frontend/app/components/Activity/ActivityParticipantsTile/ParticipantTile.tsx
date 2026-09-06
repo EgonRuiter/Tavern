@@ -81,7 +81,8 @@ export default function ParticipantTile({
         isHonoraryOrMerit
           ? cn(
               "border-amber-400 bg-amber-50/20 shadow-[0_0_0_1px_rgba(251,191,36,0.5)]",
-              isClickable && "group-hover:border-amber-500 group-hover:bg-amber-50/40",
+              isClickable &&
+                "group-hover:border-amber-500 group-hover:bg-amber-50/40",
             )
           : cn(
               "border-transparent",

@@ -13,7 +13,10 @@ import { isBoardOrCandidateBoard } from "~/util/group.util";
 
 function renderWithAdminMode(
   ui: React.ReactElement,
-  { isAdmin = true, initialStorage }: { isAdmin?: boolean; initialStorage?: string } = {},
+  {
+    isAdmin = true,
+    initialStorage,
+  }: { isAdmin?: boolean; initialStorage?: string } = {},
 ) {
   if (initialStorage !== undefined) {
     localStorage.setItem(ADMIN_MODE_STORAGE_KEY, initialStorage);
@@ -24,7 +27,8 @@ function renderWithAdminMode(
       async () =>
         ({
           locale: "en",
-          UserId: "00000000-0000-0000-0000-000000000000" as TokenParsed["UserId"],
+          UserId:
+            "00000000-0000-0000-0000-000000000000" as TokenParsed["UserId"],
           access_level: "member",
           given_name: "Test",
           family_name: "Admin",
@@ -52,21 +56,29 @@ describe("AdminModeToggle", () => {
       isAdmin: false,
     });
 
-    expect(await screen.queryByRole("button", { name: /admin_mode/i })).toBeNull();
+    expect(
+      await screen.queryByRole("button", { name: /admin_mode/i }),
+    ).toBeNull();
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders segmented control with Admin mode and Member view options for admins", async () => {
     renderWithAdminMode(<AdminModeToggle variant="segmented" />);
 
-    expect(await screen.findByRole("button", { name: /admin_mode/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /member_mode/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: /admin_mode/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /member_mode/i }),
+    ).toBeInTheDocument();
   });
 
   it("switches to member view and updates localStorage and group.util when clicked", async () => {
     renderWithAdminMode(<AdminModeToggle variant="segmented" />);
 
-    const memberBtn = await screen.findByRole("button", { name: /member_mode/i });
+    const memberBtn = await screen.findByRole("button", {
+      name: /member_mode/i,
+    });
     fireEvent.click(memberBtn);
 
     expect(localStorage.getItem(ADMIN_MODE_STORAGE_KEY)).toBe("false");

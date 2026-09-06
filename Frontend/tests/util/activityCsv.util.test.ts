@@ -95,20 +95,28 @@ describe("activityCsv.util", () => {
       expect(csv.startsWith("\uFEFF")).toBe(true);
 
       const lines = csv.replace(/^\uFEFF/, "").split("\r\n");
-      expect(lines[0]).toBe("Voornaam;Achternaam;E-mail;Status;Dieetwensen;T-Shirt Maat");
+      expect(lines[0]).toBe(
+        "Voornaam;Achternaam;E-mail;Status;Dieetwensen;T-Shirt Maat",
+      );
 
       // Participant first
-      expect(lines[1]).toBe("Alice;Participant;alice@example.com;Deelnemer;Vegan;L");
+      expect(lines[1]).toBe(
+        "Alice;Participant;alice@example.com;Deelnemer;Vegan;L",
+      );
 
       // Waiting list second, with escaped semicolon answer
-      expect(lines[2]).toBe('Bob;Waitlist;bob@example.com;Wachtlijst;"Geen; Vegetarisch";');
+      expect(lines[2]).toBe(
+        'Bob;Waitlist;bob@example.com;Wachtlijst;"Geen; Vegetarisch";',
+      );
     });
 
     it("generates English headers when isDutch is false", () => {
       const csv = generateActivityEnrollmentsCsv(mockActivity, false);
       const lines = csv.replace(/^\uFEFF/, "").split("\r\n");
 
-      expect(lines[0]).toBe("First Name;Last Name;Email;Status;Dietary restrictions;T-Shirt Size");
+      expect(lines[0]).toBe(
+        "First Name;Last Name;Email;Status;Dietary restrictions;T-Shirt Size",
+      );
       expect(lines[1]).toContain("Participant");
       expect(lines[2]).toContain("Waiting List");
     });
@@ -121,7 +129,9 @@ describe("activityCsv.util", () => {
       globalThis.URL.createObjectURL = createObjectURLMock;
       globalThis.URL.revokeObjectURL = revokeObjectURLMock;
 
-      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+      const clickSpy = vi
+        .spyOn(HTMLAnchorElement.prototype, "click")
+        .mockImplementation(() => {});
 
       downloadActivityEnrollmentsCsv({
         id: 1,

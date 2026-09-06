@@ -49,12 +49,20 @@ export const loadEditActivityData = async ({
       const source = activityRes.data;
       const originalStart = new Date(source.dateTimeStart).getTime();
       const originalEnd = new Date(source.dateTimeEnd).getTime();
-      const duration = Math.max(originalEnd - originalStart, 2 * 60 * 60 * 1000);
+      const duration = Math.max(
+        originalEnd - originalStart,
+        2 * 60 * 60 * 1000,
+      );
 
       const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const newStart = new Date(nextWeek);
       const sourceStartDate = new Date(source.dateTimeStart);
-      newStart.setHours(sourceStartDate.getHours(), sourceStartDate.getMinutes(), 0, 0);
+      newStart.setHours(
+        sourceStartDate.getHours(),
+        sourceStartDate.getMinutes(),
+        0,
+        0,
+      );
       const newEnd = new Date(newStart.getTime() + duration);
 
       const clonedActivity: ActivityResponseDto = {
@@ -70,11 +78,13 @@ export const loadEditActivityData = async ({
         posterPath: null,
         enrollments: [],
         isArchived: false,
-        specificationQuestions: (source.specificationQuestions || []).map((q) => ({
-          ...q,
-          id: undefined as any,
-          options: q.options ? [...q.options] : [],
-        })),
+        specificationQuestions: (source.specificationQuestions || []).map(
+          (q) => ({
+            ...q,
+            id: undefined as any,
+            options: q.options ? [...q.options] : [],
+          }),
+        ),
       };
       setActivity(clonedActivity);
     }

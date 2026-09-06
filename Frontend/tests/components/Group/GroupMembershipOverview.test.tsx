@@ -46,7 +46,12 @@ describe("GroupMembershipOverview", () => {
       <MemoryRouter>
         <GroupMembershipOverview
           groupMemberships={[
-            membership({ id: 1, groupId: 10, groupName: "Board", membershipYear: 2026 }),
+            membership({
+              id: 1,
+              groupId: 10,
+              groupName: "Board",
+              membershipYear: 2026,
+            }),
           ]}
           isClickable={true}
         />

@@ -284,13 +284,14 @@ describe("Activities (admin)", () => {
     renderWithProviders(<Activities />);
 
     await screen.findByText("no_more_activities");
+    const initialCalls = loadAdminActivities.mock.calls.length;
     expect(intersectionCallback).not.toBeNull();
     intersectionCallback?.(
       [{ isIntersecting: true } as IntersectionObserverEntry],
       {} as IntersectionObserver,
     );
 
-    expect(loadAdminActivities).toHaveBeenCalledTimes(1);
+    expect(loadAdminActivities).toHaveBeenCalledTimes(initialCalls);
   });
 
   it("shows a loading_more label while a page fetch is in flight", async () => {
@@ -384,11 +385,9 @@ describe("Activities (admin)", () => {
       },
     );
 
-    handleDeleteAdminActivity.mockImplementation(
-      (_id, _confirm, onSuccess) => {
-        onSuccess();
-      },
-    );
+    handleDeleteAdminActivity.mockImplementation((_id, _confirm, onSuccess) => {
+      onSuccess();
+    });
 
     renderWithProviders(<Activities />, { authService: boardAuthService });
 
@@ -409,9 +408,7 @@ describe("Activities (admin)", () => {
   it("does not render delete or archive buttons for non-board users", async () => {
     loadAdminActivities.mockImplementation(
       async (_year, setLoading, setActivities) => {
-        setActivities([
-          makeActivity({ id: 1, name: "Feest" }),
-        ]);
+        setActivities([makeActivity({ id: 1, name: "Feest" })]);
         setLoading(false);
       },
     );
@@ -519,4 +516,3 @@ describe("Activities (admin)", () => {
     ).toBeInTheDocument();
   });
 });
-

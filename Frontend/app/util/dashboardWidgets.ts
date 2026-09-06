@@ -57,9 +57,7 @@ export function loadDashboardWidgetConfig(
           visible: match.visible,
           column: match.column === "sidebar" ? "sidebar" : "main",
           order:
-            typeof match.order === "number"
-              ? match.order
-              : defaultWidget.order,
+            typeof match.order === "number" ? match.order : defaultWidget.order,
         };
       }
       return { ...defaultWidget };
@@ -83,7 +81,10 @@ export function saveDashboardWidgetConfig(
       JSON.stringify(config),
     );
   } catch (err) {
-    console.error("Failed to save dashboard widget config to localStorage:", err);
+    console.error(
+      "Failed to save dashboard widget config to localStorage:",
+      err,
+    );
   }
 }
 

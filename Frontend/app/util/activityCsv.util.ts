@@ -11,7 +11,12 @@ export function escapeCsvField(value: unknown): string {
   if (/^[=+\-@\t]/.test(str)) {
     str = `'${str}`;
   }
-  if (str.includes(";") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+  if (
+    str.includes(";") ||
+    str.includes('"') ||
+    str.includes("\n") ||
+    str.includes("\r")
+  ) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
@@ -25,7 +30,9 @@ export function generateActivityEnrollmentsCsv(
   activity: ActivityResponseDto,
   isDutch: boolean = true,
 ): string {
-  const questions = (activity.specificationQuestions || []).slice().sort((a, b) => a.id - b.id);
+  const questions = (activity.specificationQuestions || [])
+    .slice()
+    .sort((a, b) => a.id - b.id);
 
   const header = [
     isDutch ? "Voornaam" : "First Name",

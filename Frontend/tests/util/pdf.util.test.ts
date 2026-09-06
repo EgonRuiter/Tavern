@@ -1,21 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ActivityResponseDto } from "~/api";
 
-const {
-  addImage,
-  addPage,
-  save,
-  setFontSize,
-  setFont,
-  setTextColor,
-  setFillColor,
-  text,
-  rect,
-  line,
-  setDrawColor,
-  splitTextToSize,
-  jsPDFCtor,
-} = vi.hoisted(() => {
+const { addImage, addPage, save, text, jsPDFCtor } = vi.hoisted(() => {
   const addImage = vi.fn();
   const addPage = vi.fn();
   const save = vi.fn();
@@ -195,7 +181,9 @@ describe("generateParticipantChecklistPdf", () => {
       unit: "mm",
       format: "a4",
     });
-    expect(save).toHaveBeenCalledWith("afvinklijst-introductie-borrel-2026.pdf");
+    expect(save).toHaveBeenCalledWith(
+      "afvinklijst-introductie-borrel-2026.pdf",
+    );
     expect(text).toHaveBeenCalledWith(
       "Introductie Borrel 2026",
       expect.any(Number),
@@ -207,7 +195,9 @@ describe("generateParticipantChecklistPdf", () => {
     const { generateParticipantChecklistPdf } = await import("~/util/pdf.util");
     generateParticipantChecklistPdf(mockActivity, false);
 
-    expect(save).toHaveBeenCalledWith("afvinklijst-introductie-borrel-2026.pdf");
+    expect(save).toHaveBeenCalledWith(
+      "afvinklijst-introductie-borrel-2026.pdf",
+    );
     expect(text).toHaveBeenCalledWith(
       "Introductie Borrel 2026",
       expect.any(Number),
@@ -225,5 +215,33 @@ describe("generateParticipantChecklistPdf", () => {
     generateParticipantChecklistPdf(emptyActivity, true);
 
     expect(save).toHaveBeenCalledWith("afvinklijst-activiteit.pdf");
+  });
+
+  it("handles multi-page pagination and enrollments without member data", async () => {
+    const { generateParticipantChecklistPdf } = await import("~/util/pdf.util");
+    // Generate 40 enrollments to exceed page height and trigger addPage
+    const manyEnrollments = Array.from({ length: 40 }, (_, i) => ({
+      isOnWaitingList: i % 2 === 0,
+      registeredOn: "2026-01-01T00:00:00Z",
+      member:
+        i === 0
+          ? undefined
+          : ({ firstName: `Member${i}`, lastName: `Test` } as any),
+      specificationAnswers: i % 3 === 0 ? [{ answer: "Option A" }] : undefined,
+      activity: {} as any,
+    }));
+
+    const paginatedActivity = {
+      ...mockActivity,
+      name: "Big Event",
+      dateTimeStart: undefined,
+      location: undefined,
+      participantLimit: undefined,
+      enrollments: manyEnrollments as any,
+    };
+
+    generateParticipantChecklistPdf(paginatedActivity as any, false);
+    expect(addPage).toHaveBeenCalledWith("a4", "p");
+    expect(save).toHaveBeenCalledWith("afvinklijst-big-event.pdf");
   });
 });

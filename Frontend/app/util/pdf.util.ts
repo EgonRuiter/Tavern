@@ -85,7 +85,9 @@ export const generateParticipantChecklistPdf = (
     pdf.setFont("helvetica", "normal");
     pdf.setTextColor(90, 90, 90);
 
-    const startDate = activity.dateTimeStart ? new Date(activity.dateTimeStart) : null;
+    const startDate = activity.dateTimeStart
+      ? new Date(activity.dateTimeStart)
+      : null;
     const dateStr = startDate
       ? startDate.toLocaleDateString(isDutch ? "nl-NL" : "en-US", {
           weekday: "short",
@@ -131,7 +133,11 @@ export const generateParticipantChecklistPdf = (
     pdf.text(isDutch ? "Naam" : "Name", margin + 20, y);
     pdf.text(isDutch ? "Dieet / Antwoorden" : "Diet / Answers", margin + 75, y);
     pdf.text("Status", margin + 135, y);
-    pdf.text(isDutch ? "Handtekening / Notities" : "Signature / Notes", margin + 155, y);
+    pdf.text(
+      isDutch ? "Handtekening / Notities" : "Signature / Notes",
+      margin + 155,
+      y,
+    );
 
     y += 5;
     pdf.setDrawColor(220, 220, 220);
@@ -144,8 +150,10 @@ export const generateParticipantChecklistPdf = (
     if (a.isOnWaitingList !== b.isOnWaitingList) {
       return a.isOnWaitingList ? 1 : -1;
     }
-    const nameA = `${a.member?.firstName || ""} ${a.member?.lastName || ""}`.toLowerCase();
-    const nameB = `${b.member?.firstName || ""} ${b.member?.lastName || ""}`.toLowerCase();
+    const nameA =
+      `${a.member?.firstName || ""} ${a.member?.lastName || ""}`.toLowerCase();
+    const nameB =
+      `${b.member?.firstName || ""} ${b.member?.lastName || ""}`.toLowerCase();
     return nameA.localeCompare(nameB);
   });
 
@@ -172,16 +180,23 @@ export const generateParticipantChecklistPdf = (
 
     const memberName = enrollment.member
       ? `${enrollment.member.firstName || ""} ${enrollment.member.lastName || ""}`.trim()
-      : isDutch ? "Onbekend" : "Unknown";
+      : isDutch
+        ? "Onbekend"
+        : "Unknown";
 
-    const answersText = (enrollment.specificationAnswers || [])
-      .map((a) => a.answer)
-      .filter(Boolean)
-      .join(", ") || "-";
+    const answersText =
+      (enrollment.specificationAnswers || [])
+        .map((a) => a.answer)
+        .filter(Boolean)
+        .join(", ") || "-";
 
     const statusText = enrollment.isOnWaitingList
-      ? isDutch ? "Wachtlijst" : "Waitlist"
-      : isDutch ? "Deelnemer" : "Enrolled";
+      ? isDutch
+        ? "Wachtlijst"
+        : "Waitlist"
+      : isDutch
+        ? "Deelnemer"
+        : "Enrolled";
 
     pdf.setFontSize(8);
     pdf.setFont("helvetica", "normal");

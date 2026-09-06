@@ -29,9 +29,15 @@ describe("ThemeToggle", () => {
   it("renders segmented control with Light, Dark, System options by default", () => {
     renderWithTheme(<ThemeToggle variant="segmented" />);
 
-    expect(screen.getByRole("button", { name: /theme_light/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /theme_dark/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /theme_system/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /theme_light/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /theme_dark/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /theme_system/i }),
+    ).toBeInTheDocument();
   });
 
   it("switches theme when segmented option is clicked", () => {

@@ -66,11 +66,23 @@ describe("loadAdminActivities", () => {
     const setLoading = vi.fn();
     const setActivities = vi.fn();
     const activities: ActivityResponseDto[] = [
-      { id: 2, name: "Archived Event", isArchived: true } as ActivityResponseDto,
+      {
+        id: 2,
+        name: "Archived Event",
+        isArchived: true,
+      } as ActivityResponseDto,
     ];
     getActivities.mockResolvedValue({ data: activities });
 
-    await loadAdminActivities(2024, setLoading, setActivities, 1, 15, true, true);
+    await loadAdminActivities(
+      2024,
+      setLoading,
+      setActivities,
+      1,
+      15,
+      true,
+      true,
+    );
 
     expect(getActivities).toHaveBeenCalledWith({
       query: {
@@ -171,4 +183,3 @@ describe("handleDeleteAdminActivity", () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });
-

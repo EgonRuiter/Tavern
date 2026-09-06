@@ -346,7 +346,9 @@ describe("ActivityPage", () => {
     );
 
     await screen.findByText("activity-details-tile");
-    expect(document.querySelector("svg.lucide-trash-2")).not.toBeInTheDocument();
+    expect(
+      document.querySelector("svg.lucide-trash-2"),
+    ).not.toBeInTheDocument();
   });
 
   it("shows and wires up a delete button for a board member", async () => {
@@ -386,4 +388,3 @@ describe("ActivityPage", () => {
     );
   });
 });
-

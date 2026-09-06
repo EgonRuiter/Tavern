@@ -32,10 +32,10 @@ export default function ThemeToggle({
 
   if (variant === "dropdown") {
     return (
-      <div className={`flex items-center justify-between p-2 text-xs ${className}`}>
-        <span className="text-gray-500 font-medium">
-          {t("theme")}
-        </span>
+      <div
+        className={`flex items-center justify-between p-2 text-xs ${className}`}
+      >
+        <span className="text-gray-500 font-medium">{t("theme")}</span>
         <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
           <button
             type="button"

@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router";
+import AdminModeToggle from "~/components/UI/AdminModeToggle";
+import ThemeToggle from "~/components/UI/ThemeToggle";
 import {
   handleClickOutside,
   handleOptionClick,
   toggleDropdown,
 } from "./ProfileDropdown.handlers";
-import ThemeToggle from "~/components/UI/ThemeToggle";
-import AdminModeToggle from "~/components/UI/AdminModeToggle";
 
 /**
  * Context values required to control the dropdown's layout behavior.
@@ -92,7 +92,9 @@ export default function ProfileDropdown({
     const handleFrameChange = (e: Event) => {
       const customEvent = e as CustomEvent<{ userId: string; frame: string }>;
       if (!userId || customEvent.detail?.userId === userId) {
-        setFrame(customEvent.detail?.frame || (isHonoraryOrMerit ? "gold" : "default"));
+        setFrame(
+          customEvent.detail?.frame || (isHonoraryOrMerit ? "gold" : "default"),
+        );
       }
     };
     window.addEventListener("profile_frame_changed", handleFrameChange);

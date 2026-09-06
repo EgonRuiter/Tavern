@@ -48,7 +48,8 @@ export default function GroupMembershipItem({
         <p
           className={cn(
             "truncate mt-[-2.5px]",
-            canClick && "group-hover:text-(--board-primary) group-hover:underline transition-colors",
+            canClick &&
+              "group-hover:text-(--board-primary) group-hover:underline transition-colors",
           )}
           title={`${groupMembership.groupName} - ${groupMembership.membershipYear - 1}/${groupMembership.membershipYear}`}
         >

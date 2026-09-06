@@ -58,8 +58,7 @@ export default function Activities() {
 
   const isBoard = isBoardOrCandidateBoard(tokenParsed);
   const canViewPastActivities =
-    isBoard ||
-    hasPermission(tokenParsed, "ViewPastActivities");
+    isBoard || hasPermission(tokenParsed, "ViewPastActivities");
 
   const [loading, setLoading] = useState(false);
   const currentYear = getCommitteeYear();
@@ -177,7 +176,10 @@ export default function Activities() {
       }
     }
 
-    return { publishedActivities: published, unpublishedActivities: unpublished };
+    return {
+      publishedActivities: published,
+      unpublishedActivities: unpublished,
+    };
   }, [filteredActivities]);
 
   const columns: Column<ActivityResponseDto>[] = [
@@ -262,14 +264,10 @@ export default function Activities() {
               variant="secondary"
               className="px-2"
               aria-label={
-                act.isArchived
-                  ? t("unarchive_activity")
-                  : t("archive_activity")
+                act.isArchived ? t("unarchive_activity") : t("archive_activity")
               }
               title={
-                act.isArchived
-                  ? t("unarchive_activity")
-                  : t("archive_activity")
+                act.isArchived ? t("unarchive_activity") : t("archive_activity")
               }
               onClick={async (e) => {
                 e.stopPropagation();

@@ -5,7 +5,7 @@ import {
   ArrowUp,
   RotateCcw,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Button from "~/components/UI/Button";
 import Checkbox from "~/components/UI/Checkbox";
@@ -133,11 +133,7 @@ function PersonaliseDashboardModalContent({
     .sort((a, b) => a.order - b.order);
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={t("personalise_dashboard")}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={t("personalise_dashboard")}>
       <div className="flex flex-col gap-6">
         <p className="text-sm text-gray-600">
           {t("personalise_dashboard_description")}
@@ -150,7 +146,8 @@ function PersonaliseDashboardModalContent({
               {t("main_content")}
             </h3>
             <span className="text-xs text-gray-500 font-medium">
-              {mainWidgets.filter((w) => w.visible).length} / {mainWidgets.length}
+              {mainWidgets.filter((w) => w.visible).length} /{" "}
+              {mainWidgets.length}
             </span>
           </div>
 
@@ -179,9 +176,7 @@ function PersonaliseDashboardModalContent({
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() =>
-                        handleMoveOrder("main", index, index - 1)
-                      }
+                      onClick={() => handleMoveOrder("main", index, index - 1)}
                       disabled={index === 0}
                       title={t("move_up")}
                       aria-label={t("move_up")}
@@ -191,9 +186,7 @@ function PersonaliseDashboardModalContent({
                     </button>
                     <button
                       type="button"
-                      onClick={() =>
-                        handleMoveOrder("main", index, index + 1)
-                      }
+                      onClick={() => handleMoveOrder("main", index, index + 1)}
                       disabled={index === mainWidgets.length - 1}
                       title={t("move_down")}
                       aria-label={t("move_down")}
@@ -203,9 +196,7 @@ function PersonaliseDashboardModalContent({
                     </button>
                     <button
                       type="button"
-                      onClick={() =>
-                        handleSwitchColumn(widget.id, "sidebar")
-                      }
+                      onClick={() => handleSwitchColumn(widget.id, "sidebar")}
                       title={t("move_to_sidebar")}
                       aria-label={t("move_to_sidebar")}
                       className="p-1 rounded-md text-gray-500 hover:bg-gray-100 transition-colors ml-1 cursor-pointer"
@@ -256,9 +247,7 @@ function PersonaliseDashboardModalContent({
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() =>
-                        handleSwitchColumn(widget.id, "main")
-                      }
+                      onClick={() => handleSwitchColumn(widget.id, "main")}
                       title={t("move_to_main")}
                       aria-label={t("move_to_main")}
                       className="p-1 rounded-md text-gray-500 hover:bg-gray-100 transition-colors mr-1 cursor-pointer"

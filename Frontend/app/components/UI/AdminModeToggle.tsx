@@ -22,10 +22,10 @@ export default function AdminModeToggle({
 
   if (variant === "dropdown") {
     return (
-      <div className={`flex items-center justify-between p-2 text-xs ${className}`}>
-        <span className="text-gray-500 font-medium">
-          {t("view_mode")}
-        </span>
+      <div
+        className={`flex items-center justify-between p-2 text-xs ${className}`}
+      >
+        <span className="text-gray-500 font-medium">{t("view_mode")}</span>
         <div className="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200">
           <button
             type="button"
@@ -77,7 +77,9 @@ export default function AdminModeToggle({
           aria-checked={!adminMode}
           onClick={toggleAdminMode}
           aria-label={t("member_mode")}
-          title={!adminMode ? t("switch_to_admin_mode") : t("switch_to_member_mode")}
+          title={
+            !adminMode ? t("switch_to_admin_mode") : t("switch_to_member_mode")
+          }
           className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-(--board-primary) ${
             !adminMode ? "bg-(--board-primary)" : "bg-gray-300"
           }`}
@@ -116,9 +118,7 @@ export default function AdminModeToggle({
         </Button>
       </div>
       <p className="text-xs text-gray-500">
-        {adminMode
-          ? t("admin_mode_description")
-          : t("member_mode_description")}
+        {adminMode ? t("admin_mode_description") : t("member_mode_description")}
       </p>
     </div>
   );

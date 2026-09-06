@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const ADMIN_MODE_STORAGE_KEY = "tavern_admin_mode";
 export const ADMIN_MODE_CHANGED_EVENT = "tavern_admin_mode_changed";
@@ -39,7 +40,10 @@ export function AdminModeProvider({
   useEffect(() => {
     const handleStorageChange = (e: Event) => {
       const customEvent = e as CustomEvent<{ adminMode: boolean }>;
-      if (customEvent.detail && typeof customEvent.detail.adminMode === "boolean") {
+      if (
+        customEvent.detail &&
+        typeof customEvent.detail.adminMode === "boolean"
+      ) {
         setAdminModeState(customEvent.detail.adminMode);
       } else {
         setAdminModeState(isAdminModeActive());

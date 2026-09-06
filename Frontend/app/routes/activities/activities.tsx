@@ -18,7 +18,6 @@ import Modal from "~/components/UI/Modal/Modal";
 import { PageHeader } from "~/components/UI/PageHeader";
 import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
-import { getCommitteeYear } from "~/util/date.util";
 import {
   getGroupIdsWithPermission,
   hasPermission,

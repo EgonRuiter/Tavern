@@ -43,7 +43,9 @@ describe("ProfileDropdown", () => {
 
   it("renders a gold ring around the avatar when isHonoraryOrMerit is true", () => {
     renderDropdown({ isHonoraryOrMerit: true });
-    expect(screen.getByAltText("Jane Doe avatar")).toHaveClass("ring-amber-400");
+    expect(screen.getByAltText("Jane Doe avatar")).toHaveClass(
+      "ring-amber-400",
+    );
   });
 
   it("does not show options until the toggle button is clicked", () => {

@@ -95,5 +95,49 @@ describe("ThemeContext", () => {
       expect(result.current.resolvedTheme).toBe("light");
       expect(document.documentElement.classList.contains("dark")).toBe(false);
     });
+
+    it("uses default functions when used outside ThemeProvider", () => {
+      const { result } = renderHook(() => useTheme());
+      expect(result.current.theme).toBe("system");
+      expect(() => {
+        result.current.setTheme("dark");
+        result.current.toggleTheme();
+      }).not.toThrow();
+    });
+
+    it("initializes from localStorage if valid theme saved", () => {
+      localStorage.setItem(THEME_STORAGE_KEY, "dark");
+      const { result } = renderHook(() => useTheme(), { wrapper });
+      expect(result.current.theme).toBe("dark");
+      expect(result.current.resolvedTheme).toBe("dark");
+    });
+
+    it("reacts to system media query change when theme is system", () => {
+      let changeHandler: (() => void) | null = null;
+      window.matchMedia = vi.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        addEventListener: vi.fn((event, handler) => {
+          if (event === "change") changeHandler = handler;
+        }),
+        removeEventListener: vi.fn(),
+      }));
+
+      renderHook(() => useTheme(), { wrapper });
+      expect(changeHandler).toBeTypeOf("function");
+
+      act(() => {
+        // Change system preference to dark
+        (window.matchMedia as any).mockImplementation((query: string) => ({
+          matches: true,
+          media: query,
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+        }));
+        changeHandler!();
+      });
+
+      expect(document.documentElement.classList.contains("dark")).toBe(true);
+    });
   });
 });

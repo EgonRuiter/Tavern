@@ -66,6 +66,18 @@ describe("loadActivities", () => {
     expect(setLoading).toHaveBeenNthCalledWith(2, false);
   });
 
+  it("handles error when loading activities fails", async () => {
+    getActivities.mockResolvedValue({ error: "Failed to load" });
+    const setLoading = vi.fn();
+    const setActivities = vi.fn();
+
+    await loadActivities({ setLoading, setActivities });
+
+    expect(setActivities).not.toHaveBeenCalled();
+    expect(toastFn).toHaveBeenCalledWith("error", expect.anything());
+    expect(setLoading).toHaveBeenLastCalledWith(false);
+  });
+
   it("loads user enrolled activities when filter is enrolled", async () => {
     getActivities.mockResolvedValue({ data: [buildActivity({ id: 10 })] });
     const setActivities = vi.fn();
@@ -154,6 +166,33 @@ describe("copyWeekOverview", () => {
 
     const message = (navigator.clipboard.writeText as any).mock.calls[0][0];
     expect(message).toContain("Weekly Drinks");
+  });
+
+  it("handles weekly drinks without location in Dutch and without weekly drinks in Dutch", async () => {
+    const targetWednesday = new Date();
+    const currentDay = targetWednesday.getDay();
+    if (currentDay > 3 || currentDay === 0) {
+      targetWednesday.setDate(
+        targetWednesday.getDate() + (8 - (currentDay || 7)) + 2,
+      );
+    } else {
+      targetWednesday.setDate(targetWednesday.getDate() - (currentDay - 1) + 2);
+    }
+    targetWednesday.setHours(12, 0, 0, 0);
+
+    await copyWeekOverview("NL", [
+      buildActivity({
+        isWeeklyDrinks: true,
+        location: "",
+        dateTimeStart: targetWednesday.toISOString(),
+      }),
+    ]);
+    let message = (navigator.clipboard.writeText as any).mock.calls[0][0];
+    expect(message).toContain("Locatie onbekend");
+
+    await copyWeekOverview("NL", []);
+    message = (navigator.clipboard.writeText as any).mock.calls[1][0];
+    expect(message).toContain("Geen borrel deze week");
   });
 
   it("shows an error toast when the clipboard write fails", async () => {

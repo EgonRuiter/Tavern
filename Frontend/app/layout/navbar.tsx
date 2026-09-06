@@ -196,9 +196,7 @@ export default function NavBarLayout() {
   ];
 
   const { member } = useApp();
-  const isHonoraryOrMerit = Boolean(
-    member?.ereLid || member?.lidVanVerdienste,
-  );
+  const isHonoraryOrMerit = Boolean(member?.ereLid || member?.lidVanVerdienste);
 
   return (
     <div className="min-w-[320px]">

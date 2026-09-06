@@ -10,8 +10,8 @@ import type {
 import ActivityEnrollmentOverview from "~/components/Activity/ActivityEnrollmentOverview";
 import UpcomingActivities from "~/components/Activity/UpcomingActivities";
 import AnnouncementsList from "~/components/Announcement/AnnouncementsList";
-import DashboardHeader from "~/components/DashboardHeader";
 import PersonaliseDashboardModal from "~/components/Dashboard/PersonaliseDashboardModal";
+import DashboardHeader from "~/components/DashboardHeader";
 import GroupMembershipOverview from "~/components/Group/GroupMembershipOverview";
 import Button from "~/components/UI/Button";
 import { useAuth } from "~/context/AuthContext";
@@ -187,9 +187,7 @@ export default function DashboardPage() {
         return (
           <div key="my_groups" className="flex flex-col w-full gap-3">
             <p className="text-md font-medium">{t("my_groups")}</p>
-            <GroupMembershipOverview
-              groupMemberships={groupMemberships}
-            />
+            <GroupMembershipOverview groupMemberships={groupMemberships} />
           </div>
         );
       default:

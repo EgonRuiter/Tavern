@@ -64,6 +64,30 @@ describe("dashboardWidgets util", () => {
       const config = loadDashboardWidgetConfig("user-1");
       expect(config).toEqual(DEFAULT_DASHBOARD_WIDGETS);
     });
+
+    it("falls back to default order when order is not a number and fills in missing widgets", () => {
+      const partialConfig = [
+        {
+          id: "announcements",
+          visible: true,
+          column: "sidebar",
+          order: "invalid",
+        },
+      ];
+      localStorage.setItem(
+        getDashboardStorageKey("user-1"),
+        JSON.stringify(partialConfig),
+      );
+      const config = loadDashboardWidgetConfig("user-1");
+      const announcements = config.find((w) => w.id === "announcements");
+      expect(announcements?.order).toBe(0);
+      expect(announcements?.column).toBe("sidebar");
+      // Missing widgets should match defaults
+      const upcoming = config.find((w) => w.id === "upcoming_activities");
+      expect(upcoming).toEqual(
+        DEFAULT_DASHBOARD_WIDGETS.find((w) => w.id === "upcoming_activities"),
+      );
+    });
   });
 
   describe("saveDashboardWidgetConfig", () => {
@@ -82,6 +106,18 @@ describe("dashboardWidgets util", () => {
       expect(raw).toBeTruthy();
       expect(JSON.parse(raw!)).toEqual(customConfig);
     });
+
+    it("catches errors when localStorage.setItem throws", () => {
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+        throw new Error("QuotaExceeded");
+      });
+      expect(() => saveDashboardWidgetConfig([], "user-2")).not.toThrow();
+      expect(consoleError).toHaveBeenCalled();
+      consoleError.mockRestore();
+    });
   });
 
   describe("resetDashboardWidgetConfig", () => {
@@ -94,6 +130,19 @@ describe("dashboardWidgets util", () => {
       const reset = resetDashboardWidgetConfig("user-3");
       expect(localStorage.getItem(getDashboardStorageKey("user-3"))).toBeNull();
       expect(reset).toEqual(DEFAULT_DASHBOARD_WIDGETS);
+    });
+
+    it("catches errors when localStorage.removeItem throws", () => {
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+        throw new Error("StorageError");
+      });
+      const reset = resetDashboardWidgetConfig("user-3");
+      expect(reset).toEqual(DEFAULT_DASHBOARD_WIDGETS);
+      expect(consoleError).toHaveBeenCalled();
+      consoleError.mockRestore();
     });
   });
 });

@@ -56,9 +56,7 @@ export const handleProfilePictureDelete = async (
         path: { id: userId },
       });
       if (response.error) {
-        throw (
-          response.error ?? new Error("Failed to delete profile picture")
-        );
+        throw response.error ?? new Error("Failed to delete profile picture");
       }
       if (onSuccess) {
         onSuccess();
@@ -78,4 +76,3 @@ export const handleProfilePictureDelete = async (
       appendErrorMessage(t("delete_profile_picture_failed"), error),
   });
 };
-

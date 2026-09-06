@@ -119,8 +119,6 @@ export const handleDeleteActivity = async (
   toast.promise(deleteProcess(), {
     loading: t("deleting"),
     success: t("activity_deleted_successfully"),
-    error: (error) =>
-      appendErrorMessage(t("failed_to_delete_activity"), error),
+    error: (error) => appendErrorMessage(t("failed_to_delete_activity"), error),
   });
 };
-

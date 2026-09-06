@@ -30,16 +30,15 @@ import {
   hasEnrollmentOpened,
 } from "~/util/activity.util";
 import { downloadActivityEnrollmentsCsv } from "~/util/activityCsv.util";
-import { generateParticipantChecklistPdf } from "~/util/pdf.util";
 import { hasAllMandatoryAnswers } from "~/util/answer.util";
 import { getEnv } from "~/util/config.utils";
 import { formatDate } from "~/util/date.util";
 import {
-  canEditActivity,
   hasPermission,
   isBoardOrCandidateBoard,
   isInGroupWithId,
 } from "~/util/group.util";
+import { generateParticipantChecklistPdf } from "~/util/pdf.util";
 import { capitalizeFirst } from "~/util/string.util";
 import { isMemberInTargetAudience } from "~/util/targetaudience.util";
 import BorderedTile from "../../Tiles/BorderedTile";
@@ -191,7 +190,9 @@ export default function ActivityDetailsTile({
     (e) => e.isOnWaitingList,
   );
   const waitingIndex = tokenParsed
-    ? waitingListEnrollments.findIndex((e) => e.member?.id === tokenParsed.UserId)
+    ? waitingListEnrollments.findIndex(
+        (e) => e.member?.id === tokenParsed.UserId,
+      )
     : -1;
   const waitingPosition = waitingIndex !== -1 ? waitingIndex + 1 : null;
   const aheadCount = waitingIndex !== -1 ? waitingIndex : null;
@@ -416,8 +417,12 @@ export default function ActivityDetailsTile({
           <div className="flex items-center gap-3 p-3.5 rounded-xl border border-stone-300 bg-stone-100 text-stone-800 shadow-2xs">
             <Archive size={20} className="text-stone-600 shrink-0" />
             <div className="flex flex-col">
-              <span className="text-sm font-semibold">{t("archived_activity_badge")}</span>
-              <span className="text-xs text-stone-600">{t("archived_activity_notice")}</span>
+              <span className="text-sm font-semibold">
+                {t("archived_activity_badge")}
+              </span>
+              <span className="text-xs text-stone-600">
+                {t("archived_activity_notice")}
+              </span>
             </div>
           </div>
         )}

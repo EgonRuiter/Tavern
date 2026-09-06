@@ -99,6 +99,27 @@ describe("PersonaliseDashboardModal", () => {
     expect(announcements?.column).toBe("sidebar");
   });
 
+  it("allows moving a widget up in order and moving from sidebar to main", () => {
+    renderWithProviders(<PersonaliseDashboardModal {...defaultProps} />);
+
+    // Move second main widget (upcoming_activities) up
+    const moveUpButtons = screen.getAllByRole("button", { name: "move_up" });
+    // Second move up button is for upcoming_activities
+    fireEvent.click(moveUpButtons[1]);
+
+    // Move first sidebar widget (my_enrollments) to main
+    const moveToMainButtons = screen.getAllByRole("button", {
+      name: "move_to_main",
+    });
+    fireEvent.click(moveToMainButtons[0]);
+
+    fireEvent.click(screen.getByRole("button", { name: "done" }));
+
+    const savedWidgets: DashboardWidgetConfig[] = mockOnSave.mock.calls[0][0];
+    const myEnrollments = savedWidgets.find((w) => w.id === "my_enrollments");
+    expect(myEnrollments?.column).toBe("main");
+  });
+
   it("calls onReset when clicking reset to default", () => {
     renderWithProviders(<PersonaliseDashboardModal {...defaultProps} />);
 

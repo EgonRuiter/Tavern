@@ -403,7 +403,11 @@ describe("ActivityDetailsTile", () => {
         {
           isOnWaitingList: true,
           registeredOn: "2026-01-01T00:00:00Z",
-          member: { id: memberToken.UserId, firstName: "Test", lastName: "User" } as any,
+          member: {
+            id: memberToken.UserId,
+            firstName: "Test",
+            lastName: "User",
+          } as any,
           activity: null!,
         },
       ],
@@ -413,7 +417,9 @@ describe("ActivityDetailsTile", () => {
       authService,
     });
 
-    expect(await screen.findByText(/waiting_list_position/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/waiting_list_position/i),
+    ).toBeInTheDocument();
     expect(screen.getByText("#1")).toBeInTheDocument();
   });
 
@@ -437,6 +443,9 @@ describe("ActivityDetailsTile", () => {
     expect(exportBtn).toBeInTheDocument();
 
     fireEvent.click(exportBtn);
-    expect(downloadActivityEnrollmentsCsv).toHaveBeenCalledWith(activity, false);
+    expect(downloadActivityEnrollmentsCsv).toHaveBeenCalledWith(
+      activity,
+      false,
+    );
   });
 });

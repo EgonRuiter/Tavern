@@ -136,4 +136,3 @@ describe("handleProfilePictureDelete", () => {
     consoleError.mockRestore();
   });
 });
-

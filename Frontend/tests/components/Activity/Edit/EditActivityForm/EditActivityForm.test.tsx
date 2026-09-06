@@ -300,4 +300,3 @@ describe("EditActivityForm", () => {
     expect(handleDeleteActivity).not.toHaveBeenCalled();
   });
 });
-

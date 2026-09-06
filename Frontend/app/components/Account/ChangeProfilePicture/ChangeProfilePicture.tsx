@@ -78,7 +78,6 @@ export default function ChangeProfilePicture({
         return "border-amber-400 ring-4 ring-amber-300/50 shadow-amber-200";
       case "primary":
         return "border-(--board-primary-dark) ring-4 ring-(--board-primary)/40 shadow-md";
-      case "default":
       default:
         return "border-white shadow-md";
     }
@@ -176,9 +175,8 @@ export default function ChangeProfilePicture({
         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
           {t("profile_frame")}
         </span>
-        <div
+        <fieldset
           className="flex items-center gap-1.5 justify-center flex-wrap"
-          role="group"
           aria-label={t("profile_frame")}
         >
           <button
@@ -222,7 +220,7 @@ export default function ChangeProfilePicture({
               {t("frame_gold")}
             </button>
           )}
-        </div>
+        </fieldset>
       </div>
 
       <div className="mt-6 text-center">{children}</div>

@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import React from "react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminModeProvider } from "~/context/AdminModeContext";
@@ -61,15 +60,23 @@ describe("End-to-End User Simulation: Theme, Admin Mode & Member Preview", () =>
                   <Route element={<NavBarLayout />}>
                     <Route
                       path="/"
-                      element={<div data-testid="page-content">Dashboard Content</div>}
+                      element={
+                        <div data-testid="page-content">Dashboard Content</div>
+                      }
                     />
                     <Route
                       path="/activities"
-                      element={<div data-testid="page-content">Activities Content</div>}
+                      element={
+                        <div data-testid="page-content">Activities Content</div>
+                      }
                     />
                     <Route
                       path="/account"
-                      element={<div data-testid="page-content">Account Settings Content</div>}
+                      element={
+                        <div data-testid="page-content">
+                          Account Settings Content
+                        </div>
+                      }
                     />
                   </Route>
                 </Routes>
@@ -135,9 +142,7 @@ describe("End-to-End User Simulation: Theme, Admin Mode & Member Preview", () =>
 
     // Top banner must now be rendered
     await waitFor(() => {
-      expect(
-        screen.getByText("member_view_banner_text"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("member_view_banner_text")).toBeInTheDocument();
     });
 
     // In member view, verify admin links are completely hidden

@@ -40,16 +40,15 @@ export const PageHeader = ({
             {t("back")}
           </Button>
         )}
-        <h1 className="text-2xl font-bold leading-tight truncate w-full" title={title}>
+        <h1
+          className="text-2xl font-bold leading-tight truncate w-full"
+          title={title}
+        >
           {title}
         </h1>
       </div>
 
-      {action && (
-        <div className="shrink-0 flex justify-end">
-          {action}
-        </div>
-      )}
+      {action && <div className="shrink-0 flex justify-end">{action}</div>}
     </div>
   );
 };

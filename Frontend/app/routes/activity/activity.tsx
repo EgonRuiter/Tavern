@@ -1,5 +1,11 @@
 import { t } from "i18next";
-import { Archive, ArchiveRestore, Copy, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  Copy,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
@@ -13,13 +19,13 @@ import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
 import { hasEnrollmentOpened } from "~/util/activity.util";
 import { downloadActivityEnrollmentsCsv } from "~/util/activityCsv.util";
-import { generateParticipantChecklistPdf } from "~/util/pdf.util";
 import {
   canEditActivity,
   hasPermission,
   isBoardOrCandidateBoard,
   isInGroupWithId,
 } from "~/util/group.util";
+import { generateParticipantChecklistPdf } from "~/util/pdf.util";
 import type { Route } from "./+types/activity";
 import {
   getActivityBackPath,
@@ -210,60 +216,61 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
 
       <div className="space-y-6 w-full">
         <ActivityDetailsTile activity={activity} setActivity={setActivity} />
-        {hasEnrollmentOpened(activity) && (activity.areParticipantsVisible || isBoard) && (
-          <>
-            <ActivityParticipantsTile
-              enrollments={
-                activity.enrollments.filter((e) => !e.isOnWaitingList) ?? []
-              }
-              isAdmin={isBoard}
-              onExportCsv={
-                canExport
-                  ? () => {
-                      downloadActivityEnrollmentsCsv(
-                        activity,
-                        (tokenParsed?.locale || "nl")
-                          .toLowerCase()
-                          .startsWith("nl"),
-                      );
-                      toast.success(t("csv_exported"));
-                    }
-                  : undefined
-              }
-              onExportPdf={
-                canExport
-                  ? () => {
-                      generateParticipantChecklistPdf(
-                        activity,
-                        (tokenParsed?.locale || "nl")
-                          .toLowerCase()
-                          .startsWith("nl"),
-                      );
-                      toast.success(t("pdf_exported"));
-                    }
-                  : undefined
-              }
-            />
-            <ActivityParticipantsTile
-              title={t("waiting_list")}
-              enrollments={
-                !activity.areParticipantsVisible
-                  ? []
-                  : (
-                      activity.enrollments.filter((e) => e.isOnWaitingList) ??
-                      []
-                    )
-                      .slice()
-                      .sort(
-                        (a, b) =>
-                          new Date(a.registeredOn).getTime() -
-                          new Date(b.registeredOn).getTime(),
+        {hasEnrollmentOpened(activity) &&
+          (activity.areParticipantsVisible || isBoard) && (
+            <>
+              <ActivityParticipantsTile
+                enrollments={
+                  activity.enrollments.filter((e) => !e.isOnWaitingList) ?? []
+                }
+                isAdmin={isBoard}
+                onExportCsv={
+                  canExport
+                    ? () => {
+                        downloadActivityEnrollmentsCsv(
+                          activity,
+                          (tokenParsed?.locale || "nl")
+                            .toLowerCase()
+                            .startsWith("nl"),
+                        );
+                        toast.success(t("csv_exported"));
+                      }
+                    : undefined
+                }
+                onExportPdf={
+                  canExport
+                    ? () => {
+                        generateParticipantChecklistPdf(
+                          activity,
+                          (tokenParsed?.locale || "nl")
+                            .toLowerCase()
+                            .startsWith("nl"),
+                        );
+                        toast.success(t("pdf_exported"));
+                      }
+                    : undefined
+                }
+              />
+              <ActivityParticipantsTile
+                title={t("waiting_list")}
+                enrollments={
+                  !activity.areParticipantsVisible
+                    ? []
+                    : (
+                        activity.enrollments.filter((e) => e.isOnWaitingList) ??
+                        []
                       )
-              }
-              isAdmin={isBoard}
-            />
-          </>
-        )}
+                        .slice()
+                        .sort(
+                          (a, b) =>
+                            new Date(a.registeredOn).getTime() -
+                            new Date(b.registeredOn).getTime(),
+                        )
+                }
+                isAdmin={isBoard}
+              />
+            </>
+          )}
       </div>
       {confirmModal}
     </div>
