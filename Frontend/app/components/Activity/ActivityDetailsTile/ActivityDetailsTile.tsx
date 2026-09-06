@@ -1,8 +1,12 @@
 import {
+  Archive,
+  ArchiveRestore,
   Calendar,
   Clock,
+  Copy,
   Download,
   FileSpreadsheet,
+  FileText,
   Image as ImageIcon,
   MapPin,
   Users,
@@ -11,9 +15,11 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import Markdown from "react-markdown";
+import { useNavigate } from "react-router";
 import {
   type ActivityResponseDto,
   getGroupsById,
+  patchActivitiesById,
   type SpecificationAnswerResponseDto,
 } from "~/api";
 import { useApp } from "~/context/AppContext";
@@ -24,6 +30,7 @@ import {
   hasEnrollmentOpened,
 } from "~/util/activity.util";
 import { downloadActivityEnrollmentsCsv } from "~/util/activityCsv.util";
+import { generateParticipantChecklistPdf } from "~/util/pdf.util";
 import { hasAllMandatoryAnswers } from "~/util/answer.util";
 import { getEnv } from "~/util/config.utils";
 import { formatDate } from "~/util/date.util";
@@ -31,6 +38,7 @@ import { canEditActivity, isBoardOrCandidateBoard } from "~/util/group.util";
 import { isMemberInTargetAudience } from "~/util/targetaudience.util";
 import BorderedTile from "../../Tiles/BorderedTile";
 import Button from "../../UI/Button";
+import { useConfirm } from "../../UI/ConfirmModal/useConfirm";
 import AnswerQuestionsTile from "../AnswerQuestionsTile";
 import {
   handleAddToCalendar,
@@ -103,6 +111,8 @@ export default function ActivityDetailsTile({
   >;
 }) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [confirmModal, confirm] = useConfirm();
   const authService = useAuth();
   const { member } = useApp();
   const [tokenParsed, setTokenParsed] = useState<TokenParsed | null>(null);
@@ -379,6 +389,17 @@ export default function ActivityDetailsTile({
           />
         )}
 
+        {/* Archived Status Indicator */}
+        {activity.isArchived && (
+          <div className="flex items-center gap-3 p-3.5 rounded-xl border border-stone-300 bg-stone-100 text-stone-800 shadow-2xs">
+            <Archive size={20} className="text-stone-600 shrink-0" />
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">{t("archived_activity_badge")}</span>
+              <span className="text-xs text-stone-600">{t("archived_activity_notice")}</span>
+            </div>
+          </div>
+        )}
+
         {/* Waiting List Position Indicator */}
         {currentEnrollment?.isOnWaitingList && waitingPosition !== null && (
           <div className="flex items-center gap-3 p-3.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-900 shadow-2xs">
@@ -481,22 +502,105 @@ export default function ActivityDetailsTile({
             </div>
           </Button>
           {canExport && (
-            <Button
-              variant="secondary"
-              className="w-full sm:w-auto"
-              onClick={() => {
-                downloadActivityEnrollmentsCsv(activity, isDutch);
-                toast.success(t("csv_exported"));
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <FileSpreadsheet size={18} />
-                {t("export_csv")}
-              </div>
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  downloadActivityEnrollmentsCsv(activity, isDutch);
+                  toast.success(t("csv_exported"));
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <FileSpreadsheet size={18} />
+                  {t("export_csv")}
+                </div>
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  generateParticipantChecklistPdf(activity, isDutch);
+                  toast.success(t("pdf_exported"));
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <FileText size={18} />
+                  {t("export_pdf")}
+                </div>
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full sm:w-auto"
+                onClick={() =>
+                  navigate(`/activities/create?cloneFrom=${activity.id}`)
+                }
+              >
+                <div className="flex items-center gap-2">
+                  <Copy size={18} />
+                  {t("clone_activity")}
+                </div>
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full sm:w-auto"
+                onClick={async () => {
+                  const confirmed = await confirm(
+                    activity.isArchived
+                      ? t("confirm_unarchive_activity")
+                      : t("confirm_archive_activity"),
+                    {
+                      title: activity.isArchived
+                        ? t("unarchive_activity")
+                        : t("archive_activity"),
+                      variant: "secondary",
+                    },
+                  );
+                  if (!confirmed) return;
+
+                  const nextArchived = !activity.isArchived;
+                  const res = await patchActivitiesById({
+                    path: { id: activity.id },
+                    body: [
+                      {
+                        op: "replace",
+                        path: "/isarchived",
+                        value: nextArchived,
+                      },
+                    ],
+                  });
+                  if (res.error) {
+                    toast.error(t("failed_updating"));
+                    return;
+                  }
+                  if (setActivity) {
+                    setActivity((prev) =>
+                      prev ? { ...prev, isArchived: nextArchived } : prev,
+                    );
+                  }
+                  toast.success(
+                    nextArchived
+                      ? t("activity_archived")
+                      : t("activity_unarchived"),
+                  );
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  {activity.isArchived ? (
+                    <ArchiveRestore size={18} />
+                  ) : (
+                    <Archive size={18} />
+                  )}
+                  {activity.isArchived
+                    ? t("unarchive_activity")
+                    : t("archive_activity")}
+                </div>
+              </Button>
+            </>
           )}
         </div>
       </div>
+      {confirmModal}
     </div>
   );
 }

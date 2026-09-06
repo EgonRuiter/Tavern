@@ -690,5 +690,17 @@
   "all_permissions_granted_note": "The (candidate) board always has every permission, so these are locked on.",
   "manage_aliases": "Manage aliases",
   "role_aliases_note": "Aliases are the per-group display names shown for this role, e.g. \"Voorzitter\" for the global role \"Chair\".",
-  "role_alias_placeholder": "e.g. Voorzitter"
+  "role_alias_placeholder": "e.g. Voorzitter",
+  "clone_activity": "Clone activity",
+  "archive_activity": "Archive activity",
+  "unarchive_activity": "Unarchive activity",
+  "activity_archived": "Activity archived",
+  "activity_unarchived": "Activity unarchived",
+  "confirm_archive_activity": "Are you sure you want to archive this activity? It will be hidden from the regular schedule.",
+  "confirm_unarchive_activity": "Are you sure you want to unarchive this activity?",
+  "archived_activity_badge": "Archived",
+  "archived_activity_notice": "This activity is archived and hidden from regular members.",
+  "export_pdf": "Printable list (PDF)",
+  "pdf_exported": "PDF checklist downloaded"
 }
+

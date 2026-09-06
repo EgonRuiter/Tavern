@@ -1,8 +1,9 @@
 import { t } from "i18next";
-import { Trash2Icon } from "lucide-react";
+import { Archive, ArchiveRestore, Copy, Trash2Icon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
-import type { ActivityResponseDto } from "~/api";
+import { type ActivityResponseDto, patchActivitiesById } from "~/api";
 import BorderedTile from "~/components/Tiles/BorderedTile";
 import type { Column } from "~/components/Tiles/DataTableTile";
 import DataTable from "~/components/Tiles/DataTableTile";
@@ -172,7 +173,14 @@ export default function Activities() {
       render: (act) => (
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <span className="font-semibold text-slate-700">{act.name}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-700">{act.name}</span>
+              {act.isArchived && (
+                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-stone-200 text-stone-700">
+                  {t("archived_activity_badge")}
+                </span>
+              )}
+            </div>
             <span className="text-xs text-slate-400">{act.location}</span>
           </div>
         </div>
@@ -214,6 +222,79 @@ export default function Activities() {
       className: "w-full sm:w-px whitespace-nowrap text-right",
       render: (act) => (
         <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="secondary"
+            className="px-2"
+            aria-label={t("clone_activity")}
+            title={t("clone_activity")}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/activities/create?cloneFrom=${act.id}`);
+            }}
+          >
+            <Copy size={16} />
+          </Button>
+          <Button
+            variant="secondary"
+            className="px-2"
+            aria-label={
+              act.isArchived
+                ? t("unarchive_activity")
+                : t("archive_activity")
+            }
+            title={
+              act.isArchived
+                ? t("unarchive_activity")
+                : t("archive_activity")
+            }
+            onClick={async (e) => {
+              e.stopPropagation();
+              const confirmed = await confirm(
+                act.isArchived
+                  ? t("confirm_unarchive_activity")
+                  : t("confirm_archive_activity"),
+                {
+                  title: act.isArchived
+                    ? t("unarchive_activity")
+                    : t("archive_activity"),
+                  variant: "secondary",
+                },
+              );
+              if (!confirmed) return;
+
+              const nextArchived = !act.isArchived;
+              const res = await patchActivitiesById({
+                path: { id: act.id },
+                body: [
+                  {
+                    op: "replace",
+                    path: "/isarchived",
+                    value: nextArchived,
+                  },
+                ],
+              });
+              if (res.error) {
+                toast.error(t("failed_updating"));
+                return;
+              }
+              setActivities((prev) =>
+                prev.map((a) =>
+                  a.id === act.id ? { ...a, isArchived: nextArchived } : a,
+                ),
+              );
+              toast.success(
+                nextArchived
+                  ? t("activity_archived")
+                  : t("activity_unarchived"),
+              );
+            }}
+          >
+            {act.isArchived ? (
+              <ArchiveRestore size={16} />
+            ) : (
+              <Archive size={16} />
+            )}
+          </Button>
           <Button
             variant="secondary"
             className="w-full sm:w-auto"

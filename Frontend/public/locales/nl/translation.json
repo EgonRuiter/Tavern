@@ -690,5 +690,17 @@
   "all_permissions_granted_note": "Het (kandidaats)bestuur heeft altijd alle rechten, daarom staan deze vast aan.",
   "manage_aliases": "Aliassen beheren",
   "role_aliases_note": "Aliassen zijn de weergavenamen per groep voor deze rol, bijv. \"Voorzitter\" voor de algemene rol \"Chair\".",
-  "role_alias_placeholder": "bijv. Voorzitter"
+  "role_alias_placeholder": "bijv. Voorzitter",
+  "clone_activity": "Kloon activiteit",
+  "archive_activity": "Archiveer activiteit",
+  "unarchive_activity": "Dearchiveer activiteit",
+  "activity_archived": "Activiteit gearchiveerd",
+  "activity_unarchived": "Activiteit gedearchiveerd",
+  "confirm_archive_activity": "Weet je zeker dat je deze activiteit wilt archiveren? De activiteit wordt verborgen in de reguliere agenda.",
+  "confirm_unarchive_activity": "Weet je zeker dat je deze activiteit wilt dearchiveren?",
+  "archived_activity_badge": "Gearchiveerd",
+  "archived_activity_notice": "Deze activiteit is gearchiveerd en verborgen voor reguliere leden.",
+  "export_pdf": "Printbare lijst (PDF)",
+  "pdf_exported": "PDF-afvinklijst gedownload"
 }
+

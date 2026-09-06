@@ -100,12 +100,12 @@ export default function EditActivityForm({
   }, [activity]);
 
   useEffect(() => {
-    if (isEdit) {
+    if (isEdit || activity) {
       setFormValid(true);
     }
 
     loadGroups(setLoading, setGroups);
-  }, [isEdit]);
+  }, [isEdit, activity]);
 
   if (loading) return t("loading");
 

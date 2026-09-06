@@ -172,6 +172,9 @@ public class ActivityResponseDTO
     /// <inheritdoc cref="Activity.IsWeeklyDrinks"/>
     public required bool IsWeeklyDrinks { get; set; }
 
+    /// <inheritdoc cref="Activity.IsArchived"/>
+    public bool IsArchived { get; set; } = false;
+
     /// <inheritdoc cref="Activity.VatRate"/>
     public uint? VatRate { get; set; }
 
@@ -238,6 +241,7 @@ public class ActivityResponseDTO
             AreParticipantsVisible = a.AreParticipantsVisible,
             IsAdultOnly = a.IsAdultOnly,
             IsWeeklyDrinks = a.IsWeeklyDrinks,
+            IsArchived = a.IsArchived,
             AllowedAudience = a.AllowedAudience,
             VatRate = hasViewFinances ? a.VatRate : null,
             GLAccountId = hasViewFinances ? a.GLAccountId : null,
@@ -307,4 +311,9 @@ public class GetActivitiesDTO
     /// The ID of the user for whom to retrieve activities. This property can be used to filter activities based on the user's enrollments or other criteria related to the user's participation in activities.
     /// </summary>
     public Guid? UserId { get; set; }
+
+    /// <summary>
+    /// Indicates whether to filter activities by their archived status. If null (default), only non-archived activities are returned. If true, only archived activities are returned. If false, only non-archived activities are returned.
+    /// </summary>
+    public bool? IsArchived { get; set; }
 }

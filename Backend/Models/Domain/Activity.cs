@@ -35,7 +35,8 @@ public class Activity
         "/isadultonly",
         "/isweeklydrinks",
         "/allowedaudience",
-        "/specificationquestionsjson"
+        "/specificationquestionsjson",
+        "/isarchived"
     };
 
     /// <summary>
@@ -188,6 +189,11 @@ public class Activity
     /// Whether the activity belongs to the weekly drinks or not.
     /// </summary>
     public bool IsWeeklyDrinks { get; set; } = false;
+
+    /// <summary>
+    /// Whether the activity is archived.
+    /// </summary>
+    public bool IsArchived { get; set; } = false;
 
     /// <summary>
     /// Bitflag representing which student years/levels are allowed to enroll.

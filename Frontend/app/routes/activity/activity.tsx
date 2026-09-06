@@ -1,18 +1,19 @@
 import { t } from "i18next";
-import { PencilIcon, Trash2Icon } from "lucide-react";
+import { Archive, ArchiveRestore, Copy, PencilIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
-import type { ActivityResponseDto } from "~/api";
+import { type ActivityResponseDto, patchActivitiesById } from "~/api";
 import ActivityDetailsTile from "~/components/Activity/ActivityDetailsTile/ActivityDetailsTile";
 import ActivityParticipantsTile from "~/components/Activity/ActivityParticipantsTile/ActivityParticipantsTile";
 import Button from "~/components/UI/Button";
 import { useConfirm } from "~/components/UI/ConfirmModal/useConfirm";
 import { PageHeader } from "~/components/UI/PageHeader";
-import toast from "react-hot-toast";
 import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
 import { hasEnrollmentOpened } from "~/util/activity.util";
 import { downloadActivityEnrollmentsCsv } from "~/util/activityCsv.util";
+import { generateParticipantChecklistPdf } from "~/util/pdf.util";
 import { canEditActivity, isBoardOrCandidateBoard } from "~/util/group.util";
 import type { Route } from "./+types/activity";
 import {
@@ -97,6 +98,69 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
           activity &&
           (canEdit || isBoard) && (
             <div className="flex items-center gap-2">
+              <Button
+                onClick={() =>
+                  navigate(`/activities/create?cloneFrom=${activity.id}`)
+                }
+                variant="secondary"
+                className="flex items-center px-2"
+                aria-label={t("clone_activity")}
+              >
+                <Copy size={18} />
+              </Button>
+              <Button
+                onClick={async () => {
+                  const confirmed = await confirm(
+                    activity.isArchived
+                      ? t("confirm_unarchive_activity")
+                      : t("confirm_archive_activity"),
+                    {
+                      title: activity.isArchived
+                        ? t("unarchive_activity")
+                        : t("archive_activity"),
+                      variant: "secondary",
+                    },
+                  );
+                  if (!confirmed) return;
+
+                  const nextArchived = !activity.isArchived;
+                  const res = await patchActivitiesById({
+                    path: { id: activity.id },
+                    body: [
+                      {
+                        op: "replace",
+                        path: "/isarchived",
+                        value: nextArchived,
+                      },
+                    ],
+                  });
+                  if (res.error) {
+                    toast.error(t("failed_updating"));
+                    return;
+                  }
+                  setActivity((prev) =>
+                    prev ? { ...prev, isArchived: nextArchived } : prev,
+                  );
+                  toast.success(
+                    nextArchived
+                      ? t("activity_archived")
+                      : t("activity_unarchived"),
+                  );
+                }}
+                variant="secondary"
+                className="flex items-center px-2"
+                aria-label={
+                  activity.isArchived
+                    ? t("unarchive_activity")
+                    : t("archive_activity")
+                }
+              >
+                {activity.isArchived ? (
+                  <ArchiveRestore size={18} />
+                ) : (
+                  <Archive size={18} />
+                )}
+              </Button>
               {canEdit && (
                 <Button
                   onClick={() =>
@@ -150,6 +214,19 @@ export default function ActivityPage({ params }: Route.LoaderArgs) {
                           .startsWith("nl"),
                       );
                       toast.success(t("csv_exported"));
+                    }
+                  : undefined
+              }
+              onExportPdf={
+                canEdit || isBoard
+                  ? () => {
+                      generateParticipantChecklistPdf(
+                        activity,
+                        (tokenParsed?.locale || "nl")
+                          .toLowerCase()
+                          .startsWith("nl"),
+                      );
+                      toast.success(t("pdf_exported"));
                     }
                   : undefined
               }
