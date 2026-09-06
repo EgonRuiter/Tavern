@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import AuthContext from "./AuthContext";
 
 export const ADMIN_MODE_STORAGE_KEY = "tavern_admin_mode";
 export const ADMIN_MODE_CHANGED_EVENT = "tavern_admin_mode_changed";
 
 export interface AdminModeContextType {
   isAdminUser: boolean;
+  setIsAdminUser: (isAdmin: boolean) => void;
   adminMode: boolean;
   setAdminMode: (enabled: boolean) => void;
   toggleAdminMode: () => void;
@@ -18,52 +18,23 @@ export function isAdminModeActive(): boolean {
 
 const AdminModeContext = createContext<AdminModeContextType>({
   isAdminUser: false,
+  setIsAdminUser: () => {},
   adminMode: true,
   setAdminMode: () => {},
   toggleAdminMode: () => {},
 });
 
-export function AdminModeProvider({ children }: { children: React.ReactNode }) {
-  const authService = useContext(AuthContext);
-  const [isAdminUser, setIsAdminUser] = useState(false);
+export function AdminModeProvider({
+  children,
+  initialIsAdmin = false,
+}: {
+  children: React.ReactNode;
+  initialIsAdmin?: boolean;
+}) {
+  const [isAdminUser, setIsAdminUser] = useState<boolean>(initialIsAdmin);
   const [adminMode, setAdminModeState] = useState<boolean>(() =>
     isAdminModeActive(),
   );
-
-  useEffect(() => {
-    if (!authService) {
-      setIsAdminUser(false);
-      return;
-    }
-
-    let cancelled = false;
-    const checkAdmin = async () => {
-      try {
-        const token = await authService.getTokenParsed();
-        if (!cancelled && token) {
-          setIsAdminUser(
-            Boolean(
-              token.is_admin === true || (token.is_admin as any) === "true",
-            ),
-          );
-        }
-      } catch {
-        if (!cancelled) {
-          setIsAdminUser(false);
-        }
-      }
-    };
-
-    void checkAdmin();
-    const interval = setInterval(() => {
-      void checkAdmin();
-    }, 1000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [authService]);
 
   useEffect(() => {
     const handleStorageChange = (e: Event) => {
@@ -101,6 +72,7 @@ export function AdminModeProvider({ children }: { children: React.ReactNode }) {
     <AdminModeContext.Provider
       value={{
         isAdminUser,
+        setIsAdminUser,
         adminMode: isAdminUser ? adminMode : false,
         setAdminMode,
         toggleAdminMode,

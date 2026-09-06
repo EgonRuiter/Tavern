@@ -36,7 +36,7 @@ function renderWithAdminMode(
 
   return render(
     <AuthContext.Provider value={authService}>
-      <AdminModeProvider>{ui}</AdminModeProvider>
+      <AdminModeProvider initialIsAdmin={isAdmin}>{ui}</AdminModeProvider>
     </AuthContext.Provider>,
   );
 }

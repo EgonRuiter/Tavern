@@ -51,6 +51,13 @@ export default function NavBarLayout() {
     };
   }, [authService]);
 
+  const { isAdminUser, setIsAdminUser, adminMode, toggleAdminMode } =
+    useAdminMode();
+
+  useEffect(() => {
+    setIsAdminUser(Boolean(tokenParsed?.is_admin));
+  }, [tokenParsed, setIsAdminUser]);
+
   const isBoard = isBoardOrCandidateBoard(tokenParsed);
   const canSeeActivitiesAdmin =
     isBoard ||
@@ -189,7 +196,6 @@ export default function NavBarLayout() {
   ];
 
   const { member } = useApp();
-  const { isAdminUser, adminMode, toggleAdminMode } = useAdminMode();
   const isHonoraryOrMerit = Boolean(
     member?.ereLid || member?.lidVanVerdienste,
   );
