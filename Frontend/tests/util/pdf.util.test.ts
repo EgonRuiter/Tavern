@@ -2,8 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ActivityResponseDto } from "~/api";
 
 const { addImage, addPage, save, text, jsPDFCtor } = vi.hoisted(() => {
+  let pagesCount = 1;
   const addImage = vi.fn();
-  const addPage = vi.fn();
+  const addPage = vi.fn(() => {
+    pagesCount++;
+  });
+  const getNumberOfPages = vi.fn(() => pagesCount);
+  const setPage = vi.fn();
   const save = vi.fn();
   const setFontSize = vi.fn();
   const setFont = vi.fn();
@@ -11,16 +16,21 @@ const { addImage, addPage, save, text, jsPDFCtor } = vi.hoisted(() => {
   const setFillColor = vi.fn();
   const text = vi.fn();
   const rect = vi.fn();
+  const roundedRect = vi.fn();
   const line = vi.fn();
   const setDrawColor = vi.fn();
+  const setLineWidth = vi.fn();
   const splitTextToSize = vi.fn((str: string) => [str]);
   const getWidth = vi.fn(() => 210);
   const getHeight = vi.fn(() => 297);
   const jsPDFCtor = vi.fn(function MockJsPDF(this: unknown) {
+    pagesCount = 1;
     return {
       internal: { pageSize: { getWidth, getHeight } },
       addImage,
       addPage,
+      getNumberOfPages,
+      setPage,
       save,
       setFontSize,
       setFont,
@@ -28,8 +38,10 @@ const { addImage, addPage, save, text, jsPDFCtor } = vi.hoisted(() => {
       setFillColor,
       text,
       rect,
+      roundedRect,
       line,
       setDrawColor,
+      setLineWidth,
       splitTextToSize,
     };
   });
@@ -243,5 +255,35 @@ describe("generateParticipantChecklistPdf", () => {
     generateParticipantChecklistPdf(paginatedActivity as any, false);
     expect(addPage).toHaveBeenCalledWith("a4", "p");
     expect(save).toHaveBeenCalledWith("afvinklijst-big-event.pdf");
+  });
+
+  it("handles waitlist divider causing page break", async () => {
+    const { generateParticipantChecklistPdf } = await import("~/util/pdf.util");
+    // 26 confirmed participants push Y close to bottom (297 - 16 = 281), then waitlist participant triggers addPage
+    const enrollments = [
+      ...Array.from({ length: 26 }, (_, i) => ({
+        isOnWaitingList: false,
+        registeredOn: "2026-01-01T00:00:00Z",
+        member: { firstName: `Member${i}`, lastName: `Test` } as any,
+        specificationAnswers: [],
+        activity: {} as any,
+      })),
+      {
+        isOnWaitingList: true,
+        registeredOn: "2026-01-01T00:00:00Z",
+        member: { firstName: "Wait", lastName: "Lister" } as any,
+        specificationAnswers: [],
+        activity: {} as any,
+      },
+    ];
+
+    generateParticipantChecklistPdf(
+      {
+        ...mockActivity,
+        enrollments: enrollments as any,
+      },
+      true,
+    );
+    expect(addPage).toHaveBeenCalledWith("a4", "p");
   });
 });
