@@ -18,7 +18,11 @@ import { PageHeader } from "~/components/UI/PageHeader";
 import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
 import { getCommitteeYear } from "~/util/date.util";
-import { isBoardOrCandidateBoard } from "~/util/group.util";
+import {
+  getGroupIdsWithPermission,
+  hasPermission,
+  isBoardOrCandidateBoard,
+} from "~/util/group.util";
 import { cn } from "~/util/tailwind.util";
 import {
   type ActivityFilter,
@@ -175,11 +179,10 @@ export default function ActivitiesPage() {
 
   if (!tokenParsed) return null;
 
-  const isInGroup =
-    isBoard ||
-    (tokenParsed?.group_memberships ?? []).filter(
-      (g) => g.split(":")[0] === getCommitteeYear().toString(),
-    ).length > 0;
+  const canCreateActivity =
+    isBoardOrCandidateBoard(tokenParsed) ||
+    hasPermission(tokenParsed, "EditAllActivities") ||
+    getGroupIdsWithPermission(tokenParsed, "EditActivityForGroup").length > 0;
 
   return (
     <>
@@ -199,7 +202,7 @@ export default function ActivitiesPage() {
                   {t("personal_calendar")}
                 </span>
               </Button>
-              {isInGroup && (
+              {canCreateActivity && (
                 <Button
                   variant="secondary"
                   onClick={() => handleCreateActivityClick(navigate)}

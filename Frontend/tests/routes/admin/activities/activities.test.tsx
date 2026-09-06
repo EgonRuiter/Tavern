@@ -73,6 +73,7 @@ describe("Activities (admin)", () => {
       expect.any(Function),
       1,
       15,
+      false,
     );
   });
 
@@ -157,6 +158,7 @@ describe("Activities (admin)", () => {
       expect.any(Function),
       1,
       15,
+      false,
     );
   });
 
@@ -212,6 +214,7 @@ describe("Activities (admin)", () => {
       expect.any(Function),
       2,
       15,
+      false,
     );
   });
 
@@ -405,7 +408,7 @@ describe("Activities (admin)", () => {
     expect(await screen.findByText("published_activities")).toBeInTheDocument();
     expect(screen.getByText("unpublished_activities")).toBeInTheDocument();
 
-    expect(screen.getByText("Published Gala")).toBeInTheDocument();
+    expect(await screen.findByText("Published Gala")).toBeInTheDocument();
     expect(screen.getByText("Draft Workshop")).toBeInTheDocument();
 
     const publishedSection = screen

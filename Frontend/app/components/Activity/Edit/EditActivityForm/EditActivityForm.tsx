@@ -49,25 +49,34 @@ import {
  * @param {Object} props - The component props.
  * @param {ActivityResponseDto | null} props.activity - The existing activity data (if editing) or null (if creating).
  * @param {string | undefined} props.id - The unique identifier of the activity. If present, the form operates in "Edit" mode.
- * @param {boolean} props.isBoard - Flag indicating if the current user has board-level permissions.
+ * @param {boolean} props.canEditStructural - Flag indicating if the user may edit structural/online fields (board or EditAllActivities).
+ * @param {boolean} props.canManageFinances - Flag indicating if the user may edit finance fields (board or ManageFinances).
  *
  * @example
  * ```tsx
  * <EditActivityForm
  *   activity={activityData}
  *   id="123"
- *   isBoard={true}
+ *   canEditStructural={true}
+ *   canManageFinances={true}
  * />
  * ```
  */
 export default function EditActivityForm({
   activity,
   id,
-  isBoard,
+  canEditStructural,
+  canManageFinances,
+  isBoard = false,
 }: {
   activity: ActivityResponseDto | null;
   id: string | undefined;
-  isBoard: boolean;
+  /** True when the user may edit structural/online fields (board or EditAllActivities). */
+  canEditStructural: boolean;
+  /** True when the user may edit finance fields (board or ManageFinances). */
+  canManageFinances: boolean;
+  /** True when the user is board or candidate board (allows deleting activities). */
+  isBoard?: boolean;
 }) {
   const navigate = useNavigate();
   const { pathname } = window.location;
@@ -107,7 +116,8 @@ export default function EditActivityForm({
           onSubmit={(e) =>
             handleActivitySubmit({
               e,
-              isBoard,
+              canEditStructural,
+              canManageFinances,
               questions,
               setSaving,
               isEdit,
@@ -176,7 +186,7 @@ export default function EditActivityForm({
                 activity?.unenrollmentDeadline ?? "",
               )}
             />
-            {isBoard && (
+            {canEditStructural && (
               <Input
                 label={t("enroll_open_date")}
                 name="EnrollOpenDate"
@@ -273,7 +283,7 @@ export default function EditActivityForm({
               min="1"
               defaultValue={activity?.participantLimit ?? ""}
             />
-            {isBoard && (
+            {canManageFinances && (
               <>
                 <Input
                   label={t("vat_rate")}
@@ -316,7 +326,7 @@ export default function EditActivityForm({
               <div className="col-span-2">
                 <FormHeader title={t("settings")} border />
               </div>
-              {isBoard && (
+              {canEditStructural && (
                 <>
                   <Checkbox
                     label={t("is_enrollable")}

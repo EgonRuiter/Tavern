@@ -12,7 +12,7 @@ import NavBar from "~/components/Menu/NavBar/NavBar";
 import { useApp } from "~/context/AppContext";
 import { useAuth } from "~/context/AuthContext";
 import type { TokenParsed } from "~/types/TokenParsed";
-import { isBoardOrCandidateBoard } from "~/util/group.util";
+import { hasPermission, isBoardOrCandidateBoard } from "~/util/group.util";
 
 /**
  * A primary layout component that provides the main navigation structure for the application.
@@ -50,6 +50,24 @@ export default function NavBarLayout() {
   }, [authService]);
 
   const isBoard = isBoardOrCandidateBoard(tokenParsed);
+  const canSeeActivitiesAdmin =
+    isBoard ||
+    hasPermission(tokenParsed, "EditAllActivities") ||
+    hasPermission(tokenParsed, "EditActivityForGroup");
+  const canSeeMembersAdmin =
+    isBoard ||
+    hasPermission(tokenParsed, "ViewMembers") ||
+    hasPermission(tokenParsed, "ManageMembers");
+  const canSeeGroupsAdmin =
+    isBoard || hasPermission(tokenParsed, "ManageGroups");
+  const canSeeRolesAdmin =
+    isBoard ||
+    hasPermission(tokenParsed, "ManageRoles") ||
+    hasPermission(tokenParsed, "ManageRolePermissions");
+  const canSeeFinancesAdmin =
+    isBoard ||
+    hasPermission(tokenParsed, "ViewFinances") ||
+    hasPermission(tokenParsed, "ManageFinances");
 
   const [imgSrc, setImgSrc] = useState<string>("/profile-picture.svg");
 
@@ -100,7 +118,7 @@ export default function NavBarLayout() {
     options: [
       { label: t("account"), href: "/account" },
       { label: `🎁 ${t("sticky_wrapped")}`, href: "/wrapped" },
-      ...(isBoard
+      ...(canSeeActivitiesAdmin
         ? [
             {
               label: `${t("all_activities")}`,
@@ -108,7 +126,7 @@ export default function NavBarLayout() {
             },
           ]
         : []),
-      ...(isBoard
+      ...(canSeeMembersAdmin
         ? [
             {
               label: `${t("members")}`,
@@ -116,8 +134,13 @@ export default function NavBarLayout() {
             },
           ]
         : []),
-      ...(isBoard ? [{ label: `${t("groups")}`, href: "/admin/groups" }] : []),
-      ...(isBoard
+      ...(canSeeGroupsAdmin
+        ? [{ label: `${t("groups")}`, href: "/admin/groups" }]
+        : []),
+      ...(canSeeRolesAdmin
+        ? [{ label: `${t("roles")}`, href: "/admin/roles" }]
+        : []),
+      ...(canSeeFinancesAdmin
         ? [
             {
               label: `${t("finances")}`,
